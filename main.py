@@ -68,19 +68,14 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    for batch in train_dataloader:
-        print(batch[0].shape)
-        print(batch[1].shape)
-        break
-
-    # start_time = time.time()
-    # for epoch in range(cfg.NUM_EPOCHS):
-    #     # TODO
-    #     #  train one epoch
-    #     #  scheduler step
-    #     #  eval()
-    #     pass
-    # total_time = time.time() - start_time
-    # total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    # logger.info('Training ended')
-    # logger.info('Training time %s', total_time_str)
+    start_time = time.time()
+    for epoch in range(cfg.NUM_EPOCHS):
+        # TODO
+        #  train one epoch
+        #  scheduler step
+        #  eval()
+        pass
+    total_time = time.time() - start_time
+    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    logger.info('Training ended')
+    logger.info('Training time %s', total_time_str)
