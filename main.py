@@ -3,21 +3,25 @@ import argparse
 import logging
 import time
 import torch
+import datetime
 from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
+from data.utils import collate
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='X-ray-CNN')
     parser.add_argument('--root_dir', dest='root_dir', help='Path to root directory of dataset', default=None, type=str)
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
-    parser.print_help()
     return parser.parse_args()
 
 
 if __name__ == '__main__':
+    args = parse_args()
+    assert args.root_dir, 'Root directory not specified'
+
     logger = logging.getLogger()
 
     c_handler = logging.StreamHandler()
@@ -33,9 +37,7 @@ if __name__ == '__main__':
     logger.addHandler(c_handler)
     logger.addHandler(f_handler)
 
-    logger.setLevel(logging.DEBUG)
-
-    args = parse_args()
+    logger.setLevel(logging.INFO)
 
     logger.info('XrayPneumoniaCNN starts training {}'.format(time.ctime()))
     logger.info('Called with args: {}'.format(args.__dict__))
@@ -60,8 +62,20 @@ if __name__ == '__main__':
     test_df = XRayDataset(test_df)
     val_df = XRayDataset(val_df)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True)
-    test_dataloader = DataLoader(test_df, batch_size=cfg.BATCH_SIZE)
+    train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, collate_fn=collate)
+    test_dataloader = DataLoader(test_df, batch_size=cfg.BATCH_SIZE, collate_fn=collate)
     val_dataloader = DataLoader(val_df, batch_size=cfg.BATCH_SIZE)
-    logger.info('Datasets created: Train size %s Test size %s Val size %s', len(train_dataloader),
+    logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
+
+    start_time = time.time()
+    for epoch in range(cfg.NUM_EPOCHS):
+        # TODO
+        #  train one epoch
+        #  scheduler step
+        #  eval()
+        pass
+    total_time = time.time() - start_time
+    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    logger.info('Training ended')
+    logger.info('Training time %s', total_time_str)
