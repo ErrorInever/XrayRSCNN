@@ -3,7 +3,6 @@ import argparse
 import logging
 import time
 import torch
-import visualize
 import datetime
 from config.conf import cfg
 from data.dataset import XRayDataset

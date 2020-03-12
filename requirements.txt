@@ -1,3 +1,5 @@
+tqdm
+pandas
 matplotlib
 numpy
 kornia
