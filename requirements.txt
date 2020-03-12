@@ -1,3 +1,5 @@
+matplotlib
+numpy
 kornia
 torch
 torchvision

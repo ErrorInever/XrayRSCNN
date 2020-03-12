@@ -3,12 +3,12 @@ import argparse
 import logging
 import time
 import torch
+import visualize
 import datetime
 from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from data.utils import collate
 
 
 def parse_args():
@@ -59,12 +59,13 @@ if __name__ == '__main__':
     val_df = get_data_frame(os.path.join(args.root_dir, 'val'))
 
     train_dataset = XRayDataset(train_df, transforms=True)
-    test_df = XRayDataset(test_df)
-    val_df = XRayDataset(val_df)
+    test_dataset = XRayDataset(test_df)
+    val_dataset = XRayDataset(val_df)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True)
-    test_dataloader = DataLoader(test_df, batch_size=cfg.BATCH_SIZE)
-    val_dataloader = DataLoader(val_df, batch_size=cfg.BATCH_SIZE)
+    train_dataloader = DataLoader(train_dataset, batch_size=5, shuffle=True, num_workers=cfg.BATCH_SIZE)
+    test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
+    val_dataloader = DataLoader(val_dataset, batch_size=cfg.BATCH_SIZE)
+
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
