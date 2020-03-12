@@ -62,20 +62,25 @@ if __name__ == '__main__':
     test_df = XRayDataset(test_df)
     val_df = XRayDataset(val_df)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, collate_fn=collate)
-    test_dataloader = DataLoader(test_df, batch_size=cfg.BATCH_SIZE, collate_fn=collate)
+    train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True)
+    test_dataloader = DataLoader(test_df, batch_size=cfg.BATCH_SIZE)
     val_dataloader = DataLoader(val_df, batch_size=cfg.BATCH_SIZE)
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    start_time = time.time()
-    for epoch in range(cfg.NUM_EPOCHS):
-        # TODO
-        #  train one epoch
-        #  scheduler step
-        #  eval()
-        pass
-    total_time = time.time() - start_time
-    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    logger.info('Training ended')
-    logger.info('Training time %s', total_time_str)
+    for batch in train_dataloader:
+        print(batch[0].shape)
+        print(batch[1].shape)
+        break
+
+    # start_time = time.time()
+    # for epoch in range(cfg.NUM_EPOCHS):
+    #     # TODO
+    #     #  train one epoch
+    #     #  scheduler step
+    #     #  eval()
+    #     pass
+    # total_time = time.time() - start_time
+    # total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    # logger.info('Training ended')
+    # logger.info('Training time %s', total_time_str)
