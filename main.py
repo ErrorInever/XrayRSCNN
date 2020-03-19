@@ -8,6 +8,7 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
+from data.improve_dataset import compute_mean_std
 
 
 def parse_args():
@@ -61,7 +62,9 @@ if __name__ == '__main__':
     test_dataset = XRayDataset(test_df)
     val_dataset = XRayDataset(val_df)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=5, shuffle=True, num_workers=cfg.BATCH_SIZE)
+    train_dataloader = DataLoader(train_dataset, batch_size=500, shuffle=True, num_workers=cfg.BATCH_SIZE)
+    compute_mean_std(train_dataloader)
+
     test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
     val_dataloader = DataLoader(val_dataset, batch_size=cfg.BATCH_SIZE)
 

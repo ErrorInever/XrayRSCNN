@@ -8,6 +8,29 @@ from tqdm import tqdm
 logger = logging.getLogger(__name__)
 
 
+def compute_mean_std(dataloader):
+    """
+    Computes mean and standard deviation of dataset
+    :param dataloader: ``generator`` which yield [N, C, H, W] shape
+    """
+    std = 0.
+    mean = 0.
+    nb_samples = 0.
+    for data in tqdm(dataloader, total=len(dataloader)):
+        img = data[0]
+        batch_samples = img.size(0)
+        img = img.view(batch_samples, img.size(1), -1)
+        mean += img.mean(2).sum(0)
+        std += img.std(2).sum(0)
+        nb_samples += batch_samples
+
+    mean /= nb_samples
+    std /= nb_samples
+
+    print('mean: {}'.format(mean))
+    print('std: {}'.format(std))
+
+
 def horizontal_flip_all_images(root_dir, output_dir):
     """
     Horizontal flip all images from specified directory, copy and save them to output directory
