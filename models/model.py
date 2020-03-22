@@ -1,3 +1,4 @@
+import torchvision
 from torch import nn
 from models.functions import activation_func
 
@@ -21,7 +22,7 @@ class DepthwiseSeparableConv(nn.Module):
 
 class Block(nn.Module):
 
-    def __init__(self, in_channels, out_channels, repeats, strides=1, activation='relu', activation_first=True,
+    def __init__(self, in_channels, out_channels, repeats, strides=1, act_type='relu', activation_first=True,
                  grow_first=True):
         super().__init__()
 
@@ -32,7 +33,7 @@ class Block(nn.Module):
         else:
             self.skip_connection = None
 
-        self.activation = activation_func(activation)
+        self.activation = activation_func(act_type)
 
         layers = []
         channels = in_channels
@@ -56,7 +57,7 @@ class Block(nn.Module):
         if not activation_first:
             layers = layers[1:]
         else:
-            layers[0] = activation_func(activation)
+            layers[0] = activation_func(act_type)
 
         if strides != 1:
             layers.append(nn.MaxPool2d(3, strides, 1))
@@ -76,5 +77,27 @@ class Block(nn.Module):
         return out
 
 
-class XrayXception(nn.Module):
-    pass
+class Head(nn.Module):
+    """Pre-trained layers on ImageNet from vgg19"""
+    def __init__(self, pretrained=True):
+        super().__init__()
+        features = list(torchvision.models.vgg19(pretrained=pretrained, progress=True).features)[:3]
+        self.features = nn.ModuleList(features)
+
+    def forward(self, x):
+        return self.features(x)
+
+
+class XrayRSCNN(nn.Module):
+
+    def __init__(self, num_classes=2, act_type='relu'):
+        super().__init__()
+        self.num_classes = num_classes
+
+        self.head = Head(pretrained=True)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.block1 = Block(64, 128, 2, 2, activation_first=True, grow_first=True)
+
+    def forward(self, x):
+        pass
+
