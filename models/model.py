@@ -1,4 +1,5 @@
 import torchvision
+import torch.nn.functional as F
 from torch import nn
 from models.functions import activation_func
 
@@ -82,7 +83,7 @@ class Head(nn.Module):
     def __init__(self, pretrained=True):
         super().__init__()
         features = list(torchvision.models.vgg19(pretrained=pretrained, progress=True).features)[:3]
-        self.features = nn.ModuleList(features)
+        self.features = nn.Sequential(*features)
 
     def forward(self, x):
         return self.features(x)
@@ -96,8 +97,41 @@ class XrayRSCNN(nn.Module):
 
         self.head = Head(pretrained=True)
         self.bn1 = nn.BatchNorm2d(64)
-        self.block1 = Block(64, 128, 2, 2, activation_first=True, grow_first=True)
+        self.block1 = Block(64, 128, 1, 2, activation_first=True, grow_first=True)
+        self.block2 = Block(128, 256, 1, 2, activation_first=True, grow_first=True)
+        self.block3 = Block(256, 256, 3, 1, activation_first=True, grow_first=True)
+        self.block4 = Block(256, 512, 1, 2, activation_first=True, grow_first=True)
+        self.block5 = Block(512, 512, 2, 1, activation_first=True, grow_first=False)
+
+        self.conv5 = DepthwiseSeparableConv(512, 1024, 3, 1, 1)
+        self.bn2 = nn.BatchNorm2d(1024)
+        self.activation1 = activation_func(act_type)
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, num_classes)
+
+        self.sm = nn.Softmax(dim=1)
 
     def forward(self, x):
-        pass
+        x = self.head(x)
+        x = self.bn1(x)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.block4(x)
+        x = self.block5(x)
 
+        x = self.conv5(x)
+        x = self.bn2(x)
+        x = self.activation1(x)
+
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = x.view(x.size(0), -1)
+        x = self.fc1(x)
+        x = self.fc2(x)
+
+        return x
+
+    def inference(self, x):
+        x = self.forward(x)
+        x = self.sm(x)
+        return x
