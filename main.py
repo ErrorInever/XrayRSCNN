@@ -76,8 +76,10 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE, amsgrad=True)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
+    # train model
     start_time = time.time()
     for epoch in range(cfg.NUM_EPOCHS):
+        scheduler.step()
         logger.info('Epoch {}/{}:'.format(epoch, cfg.NUM_EPOCHS - 1))
 
         running_loss, running_acc = train_one_epoch(model, loss, optimizer, train_dataloader, device,
@@ -85,12 +87,11 @@ if __name__ == '__main__':
 
         epoch_loss = running_loss / len(train_dataloader)
         epoch_acc = running_acc / len(train_dataloader)
+        logger.info('Loss: {:.4f} Acc: {:.4f}'.format(epoch_loss, epoch_acc))
 
-        # TODO
-        #  train one epoch
-        #  scheduler step
         #  eval()
-        pass
+        # save checkpoint
+
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     logger.info('Training ended')
