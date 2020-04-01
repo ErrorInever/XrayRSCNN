@@ -8,7 +8,8 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from data.improve_dataset import compute_mean_std
+from models.model import XrayRSCNN
+from models.train import train_one_epoch
 
 
 def parse_args():
@@ -62,17 +63,29 @@ if __name__ == '__main__':
     test_dataset = XRayDataset(test_df)
     val_dataset = XRayDataset(val_df)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=500, shuffle=True, num_workers=cfg.BATCH_SIZE)
-    compute_mean_std(train_dataloader)
-
+    train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=cfg.BATCH_SIZE)
     test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
     val_dataloader = DataLoader(val_dataset, batch_size=cfg.BATCH_SIZE)
 
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
+    model = XrayRSCNN()
+    model.to(device)
+    loss = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE, amsgrad=True)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+
     start_time = time.time()
     for epoch in range(cfg.NUM_EPOCHS):
+        logger.info('Epoch {}/{}:'.format(epoch, cfg.NUM_EPOCHS - 1))
+
+        running_loss, running_acc = train_one_epoch(model, loss, optimizer, train_dataloader, device,
+                                                    cfg.OUT_DIR, tensorboard=True)
+
+        epoch_loss = running_loss / len(train_dataloader)
+        epoch_acc = running_acc / len(train_dataloader)
+
         # TODO
         #  train one epoch
         #  scheduler step
