@@ -10,6 +10,7 @@ from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
 from models.model import XrayRSCNN
 from models.train import train_one_epoch
+from tensorboardX import SummaryWriter
 
 
 def parse_args():
@@ -72,26 +73,29 @@ if __name__ == '__main__':
 
     model = XrayRSCNN()
     model.to(device)
+
     loss = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE, amsgrad=True)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
+    metric_logger = SummaryWriter()
     # train model
     start_time = time.time()
     for epoch in range(cfg.NUM_EPOCHS):
         logger.info('Epoch {}/{}:'.format(epoch, cfg.NUM_EPOCHS - 1))
 
-        running_loss, running_acc = train_one_epoch(model, loss, optimizer, train_dataloader, device,
-                                                    cfg.OUT_DIR, epoch, tensorboard=True, print_freq=30)
+        running_loss, running_acc = train_one_epoch(model, loss, optimizer, train_dataloader, device)
         scheduler.step()
 
         epoch_loss = running_loss / len(train_dataloader)
         epoch_acc = running_acc / len(train_dataloader)
         logger.info('[Epoch Loss: {:.4f} | Epoch Acc: {:.4f}]'.format(epoch_loss, epoch_acc))
-
+        metric_logger.add_scalar('train/loss', epoch_loss, epoch)
+        metric_logger.add_scalar('train/acc', epoch_acc, epoch)
         #  eval()
         # save checkpoint
 
+    metric_logger.close()
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     logger.info('Training ended')
