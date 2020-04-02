@@ -79,15 +79,15 @@ if __name__ == '__main__':
     # train model
     start_time = time.time()
     for epoch in range(cfg.NUM_EPOCHS):
-        scheduler.step()
         logger.info('Epoch {}/{}:'.format(epoch, cfg.NUM_EPOCHS - 1))
 
         running_loss, running_acc = train_one_epoch(model, loss, optimizer, train_dataloader, device,
-                                                    cfg.OUT_DIR, tensorboard=True)
+                                                    cfg.OUT_DIR, epoch, tensorboard=True, print_freq=30)
+        scheduler.step()
 
         epoch_loss = running_loss / len(train_dataloader)
         epoch_acc = running_acc / len(train_dataloader)
-        logger.info('Loss: {:.4f} Acc: {:.4f}'.format(epoch_loss, epoch_acc))
+        logger.info('[Epoch Loss: {:.4f} | Epoch Acc: {:.4f}]'.format(epoch_loss, epoch_acc))
 
         #  eval()
         # save checkpoint

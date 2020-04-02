@@ -2,10 +2,11 @@ import torch
 import logging
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
+logger = logging.getLogger(__name__)
 
 
 def train_one_epoch(model, loss, optimizer, data_loader,
-                    device, out_dir, tensorboard=False):
+                    device, out_dir, epoch, tensorboard=True, print_freq=30):
     """
     :param model:
     :param loss:
@@ -19,25 +20,38 @@ def train_one_epoch(model, loss, optimizer, data_loader,
     :param print_freq:
     :return:
     """
+    logger.setLevel(logging.INFO)
+
     if tensorboard:
-        logger = SummaryWriter(out_dir)
+        metric_logger = SummaryWriter(out_dir)
 
     running_loss = 0.
     running_acc = 0.
+    freq_value = 0
 
     for images, labels in tqdm(data_loader, total=len(data_loader)):
+        freq_value += 1
+
         images = images.to(device)
         labels = labels.to(device)
         optimizer.zero_grad()
 
         with torch.set_grad_enabled(True):
             predicts = model(images)
-            loss_value = loss(predicts, labels)
+            loss_value = loss(predicts, labels.squeeze())
             predicts_class = predicts.argmax(dim=1)
             loss_value.backward()
             optimizer.step()
 
         running_loss += loss_value.item()
         running_acc += (predicts_class == labels.data).float().mean()
+
+        if tensorboard:
+            metric_logger.add_scalar('train/losses', running_loss, epoch)
+            metric_logger.add_scalar('train/acc', running_acc, epoch)
+            metric_logger.close()
+
+        if freq_value % print_freq == 0:
+            logger.info('[Running Loss: {:.4f} | Running Acc: {:.4f}]'.format(running_loss, running_acc))
 
     return running_loss, running_acc
