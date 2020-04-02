@@ -1,3 +1,4 @@
+tensorboardX
 tqdm
 pandas
 matplotlib
