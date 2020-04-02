@@ -11,11 +11,6 @@ def train_one_epoch(model, loss, optimizer, data_loader, device):
     :param optimizer:
     :param data_loader:
     :param device:
-    :param out_dir:
-    :param running_loss:
-    :param running_acc:
-    :param tensorboard:
-    :param print_freq:
     :return:
     """
     logger.setLevel(logging.INFO)
