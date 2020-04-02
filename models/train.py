@@ -39,19 +39,20 @@ def train_one_epoch(model, loss, optimizer, data_loader,
         with torch.set_grad_enabled(True):
             predicts = model(images)
             loss_value = loss(predicts, labels.squeeze())
-            predicts_class = predicts.argmax(dim=1)
+
             loss_value.backward()
             optimizer.step()
 
         running_loss += loss_value.item()
-        running_acc += (predicts_class == labels.data).float().mean()
+        running_acc += (predicts.argmax(dim=1) == labels.data).float().mean()
 
         if tensorboard:
-            metric_logger.add_scalar('train/losses', running_loss, epoch)
-            metric_logger.add_scalar('train/acc', running_acc, epoch)
+            metric_logger.add_scalar('train/losses', running_loss / len(data_loader), epoch)
+            metric_logger.add_scalar('train/acc', running_acc / len(data_loader), epoch)
             metric_logger.close()
 
         if freq_value % print_freq == 0:
-            logger.info('[Running Loss: {:.4f} | Running Acc: {:.4f}]'.format(running_loss, running_acc))
+            logger.info('[Running Loss: {:.4f} | Running Acc: {:.4f}]'.format(running_loss / len(data_loader),
+                                                                              running_acc / len(data_loader)))
 
     return running_loss, running_acc
