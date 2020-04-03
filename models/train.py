@@ -4,8 +4,9 @@ from tqdm import tqdm
 logger = logging.getLogger(__name__)
 
 
-def train_one_epoch(model, loss, optimizer, data_loader, device):
+def train_one_epoch(model, loss, optimizer, scheduler, data_loader, device):
     """
+    :param scheduler:
     :param model:
     :param loss:
     :param optimizer:
@@ -30,6 +31,7 @@ def train_one_epoch(model, loss, optimizer, data_loader, device):
 
             loss_value.backward()
             optimizer.step()
+            scheduler.step()
 
         running_loss += loss_value.item()
         running_acc += (predicts.argmax(dim=1) == labels.data).float().mean()
