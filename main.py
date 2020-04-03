@@ -12,6 +12,7 @@ from models.model import XrayRSCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
 from tensorboardX import SummaryWriter
+from utils.metrics import print_metrics
 
 
 def parse_args():
@@ -88,26 +89,15 @@ if __name__ == '__main__':
 
         # train
         model.train()
-        running_loss, running_acc = train_one_epoch(model, loss, optimizer, train_dataloader, device)
-
-        epoch_loss = running_loss / len(train_dataloader)
-        epoch_acc = running_acc / len(train_dataloader)
-        logger.info('Train [Epoch Loss: {:.4f} | Epoch Acc: {:.4f}]'.format(epoch_loss, epoch_acc))
-        metric_logger.add_scalar('train/loss', epoch_loss, epoch)
-        metric_logger.add_scalar('train/acc', epoch_acc, epoch)
+        running_loss, running_acc = train_one_epoch(model, loss, optimizer, scheduler, train_dataloader, device)
+        print_metrics('Train', epoch, metric_logger, running_loss, running_acc, len(train_dataloader))
 
         # evaluate
         model.eval()
         eval_running_loss, eval_running_acc = evaluate(model, val_dataloader, loss, device)
-
-        epoch_val_loss = eval_running_loss / len(val_dataloader)
-        epoch_val_acc = eval_running_acc / len(val_dataloader)
-        logger.info('Eval [Epoch Loss: {:.4f} | Epoch Acc: {:.4f}]'.format(epoch_val_loss, epoch_val_acc))
-        metric_logger.add_scalar('eval/loss', epoch_val_loss, epoch)
-        metric_logger.add_scalar('eval/acc', epoch_val_acc, epoch)
+        print_metrics('Val', epoch, metric_logger, eval_running_loss, eval_running_acc, len(val_dataloader))
 
         metric_logger.close()
-        scheduler.step()
         # save checkpoint
 
     total_time = time.time() - start_time
