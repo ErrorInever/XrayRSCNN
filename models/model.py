@@ -135,3 +135,16 @@ class XrayRSCNN(nn.Module):
         x = self.forward(x)
         x = self.sm(x)
         return x
+
+
+def get_resnet_34_test(num_class=2, pretrained=True):
+    model_ft = torchvision.models.resnet34(pretrained=pretrained)
+
+    # freeze
+    for param in model_ft.parameters():
+        param.requires_grad = False
+
+    num_features = model_ft.fc.in_features
+    model_ft.fc = nn.Linear(num_features, num_class)
+
+    return model_ft

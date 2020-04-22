@@ -8,7 +8,7 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from models.model import XrayRSCNN
+from models.model import XrayRSCNN, get_resnet_34_test
 from models.train import train_one_epoch
 from models.eval import evaluate
 from tensorboardX import SummaryWriter
@@ -73,7 +73,8 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    model = XrayRSCNN()
+    #model = XrayRSCNN()
+    model = get_resnet_34_test()
     model.to(device)
 
     loss = torch.nn.CrossEntropyLoss()

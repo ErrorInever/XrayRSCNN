@@ -1,4 +1,3 @@
-from tqdm import tqdm
 
 
 def evaluate(model, dataloader, loss, device):
@@ -12,7 +11,7 @@ def evaluate(model, dataloader, loss, device):
     running_loss = 0.
     running_acc = 0.
 
-    for images, labels in tqdm(dataloader, total=len(dataloader)):
+    for images, labels in dataloader:
         images = images.to(device)
         labels = labels.to(device)
 

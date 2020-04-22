@@ -1,6 +1,5 @@
 import torch
 import logging
-from tqdm import tqdm
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +18,7 @@ def train_one_epoch(model, loss, optimizer, scheduler, data_loader, device):
     running_loss = 0.
     running_acc = 0.
 
-    for images, labels in tqdm(data_loader, total=len(data_loader)):
+    for images, labels in data_loader:
 
         images = images.to(device)
         labels = labels.to(device)
