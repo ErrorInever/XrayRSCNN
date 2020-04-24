@@ -16,13 +16,16 @@ def evaluate(model, dataloader, criterion, device, epoch, print_freq=100):
         labels = label.to(device)
 
         outputs = model(images)
-        loss = criterion(outputs, labels)
+        try:
+            loss = criterion(outputs, labels.squeeze())
+        except IndexError:
+            loss = criterion(outputs, labels.squeeze(0))
+        finally:
+            running_loss += loss.item()
+            running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
 
-        running_loss += loss.item()
-        running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
-
-        if i % print_freq == 0:
-            logger.info('Evaluate [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
-                        running_loss / print_freq, running_acc / print_freq)
-            running_loss = 0.
-            running_acc = 0.
+            if i % print_freq == 0:
+                logger.info('Evaluate [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
+                            running_loss / print_freq, running_acc / print_freq)
+                running_loss = 0.
+                running_acc = 0.
