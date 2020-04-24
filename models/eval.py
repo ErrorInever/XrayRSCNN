@@ -36,7 +36,8 @@ def evaluate(model, dataloader, criterion, device, epoch, metric_logger, print_f
                 running_loss = 0.
                 running_acc = 0.
 
-    logger.info('---------- EPOCH LOSS: %s | EPOCH ACC: %s ---------',
+    logger.info('---------- EPOCH [%s] | LOSS: %s | EPOCH ACC: %s ---------', epoch + 1,
                 epoch_loss / len(dataloader), epoch_acc / len(dataloader))
-    metric_logger.add_scalar('eval/loss', epoch_loss, epoch)
-    metric_logger.add_scalar('eval/acc', epoch_acc, epoch)
+    metric_logger.add_scalar('loss/eval', epoch_loss / len(dataloader), epoch)
+    metric_logger.add_scalar('acc/eval', epoch_acc / len(dataloader), epoch)
+    metric_logger.close()

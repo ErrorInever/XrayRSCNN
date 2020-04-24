@@ -40,8 +40,9 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
             running_loss = 0.
             running_acc = 0.
 
-    logger.info('---------- EPOCH LOSS: %s | EPOCH ACC: %s ---------',
+    logger.info('---------- EPOCH [%s] | LOSS: %s | EPOCH ACC: %s ---------', epoch + 1,
                 epoch_loss / len(dataloader), epoch_acc / len(dataloader))
 
-    metric_logger.add_scalar('train/loss', epoch_loss, epoch)
-    metric_logger.add_scalar('train/acc', epoch_acc, epoch)
+    metric_logger.add_scalar('loss/train', epoch_loss / len(dataloader), epoch)
+    metric_logger.add_scalar('acc/train', epoch_acc / len(dataloader), epoch)
+    metric_logger.close()
