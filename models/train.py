@@ -10,14 +10,14 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
     running_acc = 0.
 
     model.train()
-    for i, image, label in enumerate(dataloader, 0):
+    for i, (image, label) in enumerate(dataloader):
         images = image.to(device)
         labels = label.to(device)
 
         optimizer.zero_grad()
 
         outputs = model(images)
-        loss = criterion(outputs, labels)
+        loss = criterion(outputs, labels.squeeze())
         loss.backward()
 
         optimizer.step()
@@ -28,7 +28,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
         running_acc += (outputs.argmax(dim=1) == labels.data).float().mean()
 
         if i % print_freq == 0:
-            logger.info('[%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
-                        running_loss / print_freq, running_acc / print_freq)
+            logger.info('Train [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
+                        running_loss / print_freq, running_acc.item() / print_freq)
             running_loss = 0.
             running_acc = 0.

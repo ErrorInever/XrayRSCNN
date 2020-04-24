@@ -10,6 +10,7 @@ from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
 from models.model import XrayRSCNN, get_resnet_50_test
 from models.train import train_one_epoch
+from models.eval import evaluate
 from tensorboardX import SummaryWriter
 
 
@@ -86,6 +87,8 @@ if __name__ == '__main__':
 
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler, device, epoch, print_freq=100)
+        evaluate(model, val_dataloader, criterion, device, epoch, print_freq=100)
+
     total_time = time.time() - start_time
 
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
