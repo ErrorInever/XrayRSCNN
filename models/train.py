@@ -1,38 +1,34 @@
-import torch
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def train_one_epoch(model, loss, optimizer, scheduler, data_loader, device):
-    """
-    :param scheduler:
-    :param model:
-    :param loss:
-    :param optimizer:
-    :param data_loader:
-    :param device:
-    :return:
-    """
+def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch, print_freq=100):
     logger.setLevel(logging.INFO)
 
     running_loss = 0.
     running_acc = 0.
 
-    for images, labels in data_loader:
+    model.train()
+    for i, image, label in enumerate(dataloader, 0):
+        images = image.to(device)
+        labels = label.to(device)
 
-        images = images.to(device)
-        labels = labels.to(device)
         optimizer.zero_grad()
 
-        with torch.set_grad_enabled(True):
-            predicts = model(images)
-            loss_value = loss(predicts, labels.squeeze())
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
 
-            loss_value.backward()
-            optimizer.step()
-            scheduler.step()
+        optimizer.step()
+        scheduler.step()
 
-        running_loss += loss_value.item()
-        running_acc += (predicts.argmax(dim=1) == labels.data).float().mean()
+        # statistics
+        running_loss += loss.item()
+        running_acc += (outputs.argmax(dim=1) == labels.data).float().mean()
 
-    return running_loss, running_acc
+        if i % print_freq == 0:
+            logger.info('[%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
+                        running_loss / print_freq, running_acc / print_freq)
+            running_loss = 0.
+            running_acc = 0.

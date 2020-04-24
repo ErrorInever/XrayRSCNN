@@ -8,11 +8,9 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from models.model import XrayRSCNN, get_resnet_34_test
+from models.model import XrayRSCNN, get_resnet_50_test
 from models.train import train_one_epoch
-from models.eval import evaluate
 from tensorboardX import SummaryWriter
-from utils.metrics import print_metrics
 
 
 def parse_args():
@@ -73,11 +71,11 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    #model = XrayRSCNN()
-    model = get_resnet_34_test()
+    # model = XrayRSCNN()
+    model = get_resnet_50_test()
     model.to(device)
 
-    loss = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE, amsgrad=True)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
@@ -85,23 +83,11 @@ if __name__ == '__main__':
 
     # ---- Train model -----
     start_time = time.time()
+
     for epoch in range(cfg.NUM_EPOCHS):
-        logger.info('Epoch {}/{}:'.format(epoch, cfg.NUM_EPOCHS - 1))
-
-        # train
-        model.train()
-        running_loss, running_acc = train_one_epoch(model, loss, optimizer, scheduler, train_dataloader, device)
-        print_metrics('Train', epoch, metric_logger, running_loss, running_acc, len(train_dataloader))
-
-        # evaluate
-        model.eval()
-        eval_running_loss, eval_running_acc = evaluate(model, val_dataloader, loss, device)
-        print_metrics('Val', epoch, metric_logger, eval_running_loss, eval_running_acc, len(val_dataloader))
-
-        metric_logger.close()
-        # save checkpoint
-
+        train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler, device, epoch, print_freq=100)
     total_time = time.time() - start_time
+
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     logger.info('Training ended')
     logger.info('Training time %s', total_time_str)

@@ -137,10 +137,9 @@ class XrayRSCNN(nn.Module):
         return x
 
 
-def get_resnet_34_test(num_class=2, pretrained=True):
-    model_ft = torchvision.models.resnet34(pretrained=pretrained)
+def get_resnet_50_test(num_class=2, pretrained=True):
+    model_ft = torchvision.models.resnet50(pretrained=pretrained)
 
-    # freeze
     for param in model_ft.parameters():
         param.requires_grad = False
 
