@@ -28,17 +28,20 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
 
         # statistics
         running_loss += loss.item()
-        running_acc += (outputs.argmax(dim=1) == labels.data).float().mean()
+        running_acc += (outputs.argmax(dim=1) == labels.data).float().mean().item()
 
-        epoch_loss += running_loss
-        epoch_acc += epoch_acc
+        epoch_loss += loss.item()
+        epoch_acc += (outputs.argmax(dim=1) == labels.data).float().mean().item()
 
         if (i % print_freq == 0) and i != 0:
             logger.info('Train [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
-                        running_loss / print_freq, running_acc.item() / print_freq)
+                        running_loss / print_freq, running_acc / print_freq)
 
             running_loss = 0.
             running_acc = 0.
 
-    logger.info('---------- EPOCH LOSS: %s | EPOCH ACC: %s ---------', epoch + 1,
+    logger.info('---------- EPOCH LOSS: %s | EPOCH ACC: %s ---------',
                 epoch_loss / len(dataloader), epoch_acc / len(dataloader))
+
+    metric_logger.add_scalar('train/loss', epoch_loss, epoch)
+    metric_logger.add_scalar('train/acc', epoch_acc, epoch)
