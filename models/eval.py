@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def evaluate(model, dataloader, criterion, device, epoch, print_freq=100):
+def evaluate(model, dataloader, criterion, device, epoch, metric_logger, print_freq=100):
     logger.setLevel(logging.INFO)
 
     model.eval()
@@ -24,7 +24,7 @@ def evaluate(model, dataloader, criterion, device, epoch, print_freq=100):
             running_loss += loss.item()
             running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
 
-            if i % print_freq == 0:
+            if (i % print_freq == 0) and i != 0:
                 logger.info('Evaluate [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
                             running_loss / print_freq, running_acc / print_freq)
                 running_loss = 0.

@@ -3,8 +3,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch, print_freq=100):
+def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch, metric_logger, print_freq=100):
     logger.setLevel(logging.INFO)
+
+    epoch_loss = 0.
+    epoch_acc = 0.
 
     running_loss = 0.
     running_acc = 0.
@@ -27,8 +30,15 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
         running_loss += loss.item()
         running_acc += (outputs.argmax(dim=1) == labels.data).float().mean()
 
-        if i % print_freq == 0:
+        epoch_loss += running_loss
+        epoch_acc += epoch_acc
+
+        if (i % print_freq == 0) and i != 0:
             logger.info('Train [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
                         running_loss / print_freq, running_acc.item() / print_freq)
+
             running_loss = 0.
             running_acc = 0.
+
+    logger.info('---------- EPOCH LOSS: %s | EPOCH ACC: %s ---------', epoch + 1,
+                epoch_loss / len(dataloader), epoch_acc / len(dataloader))

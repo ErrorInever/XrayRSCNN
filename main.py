@@ -77,7 +77,7 @@ if __name__ == '__main__':
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE, amsgrad=True)
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
     metric_logger = SummaryWriter()
@@ -86,8 +86,9 @@ if __name__ == '__main__':
     start_time = time.time()
 
     for epoch in range(cfg.NUM_EPOCHS):
-        train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler, device, epoch, print_freq=100)
-        evaluate(model, val_dataloader, criterion, device, epoch, print_freq=100)
+        train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
+                        device, epoch, metric_logger, print_freq=100)
+        evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, print_freq=5)
 
     total_time = time.time() - start_time
 
