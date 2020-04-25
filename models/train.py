@@ -29,7 +29,6 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
 
         # statistics
         running_loss += loss.item()
-        graph_loss.append(epoch, {'train_loss': running_loss})
 
         running_acc += (outputs.argmax(dim=1) == labels.data).float().mean().item()
 
@@ -48,4 +47,5 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
 
     metric_logger.add_scalar('loss/train', epoch_loss / len(dataloader), epoch)
     metric_logger.add_scalar('acc/train', epoch_acc / len(dataloader), epoch)
+    graph_loss.append(epoch, {'train_loss': epoch_loss / len(dataloader)})
     metric_logger.close()

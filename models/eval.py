@@ -25,8 +25,6 @@ def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_l
             loss = criterion(outputs, labels.squeeze(0))
         finally:
             running_loss += loss.item()
-            graph_loss.append(epoch, {'val_loss': running_loss})
-
             running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
 
             epoch_loss += loss.item()
@@ -42,4 +40,5 @@ def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_l
                 epoch_loss / len(dataloader), epoch_acc / len(dataloader))
     metric_logger.add_scalar('loss/eval', epoch_loss / len(dataloader), epoch)
     metric_logger.add_scalar('acc/eval', epoch_acc / len(dataloader), epoch)
+    graph_loss.append(epoch, {'val_loss': epoch_loss / len(dataloader)})
     metric_logger.close()

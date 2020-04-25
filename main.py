@@ -49,7 +49,11 @@ if __name__ == '__main__':
     logger.info('Config params:{}'.format(cfg.__dict__))
 
     losswise.set_api_key(args.api_key)
-    session = losswise.Session(tag='x-ray-test')
+    session = losswise.Session(tag='x-ray-test',
+                               params={'Adam learning rate': cfg.LEARNING_RATE,
+                                       'Scheduler gamma': 0.1},
+                               max_iter=cfg.NUM_EPOCHS,
+                               track_git=False)
 
     if torch.cuda.is_available() and not args.use_gpu:
         logger.info('You have a GPU device so you should probably run with --use_gpu')
@@ -86,8 +90,8 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
     metric_logger = SummaryWriter()
-    graph_loss = session.graph('loss', kind='min', display_interval=1)
-    graph_accuracy = session.graph('accuracy', kind='max', display_interval=1)
+    graph_loss = session.graph('loss', kind='min')
+    #graph_accuracy = session.graph('accuracy', kind='max', display_interval=1)
 
     # ---- Train model -----
     start_time = time.time()
@@ -98,8 +102,8 @@ if __name__ == '__main__':
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss, print_freq=5)
 
     session.done()
-    total_time = time.time() - start_time
 
+    total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     logger.info('Training ended')
     logger.info('Training time %s', total_time_str)
