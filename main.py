@@ -86,15 +86,18 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
     metric_logger = SummaryWriter()
+    graph_loss = session.graph('loss', kind='min', display_interval=1)
+    graph_accuracy = session.graph('accuracy', kind='max', display_interval=1)
 
     # ---- Train model -----
     start_time = time.time()
 
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
-                        device, epoch, metric_logger, print_freq=100)
-        evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, print_freq=5)
+                        device, epoch, metric_logger, graph_loss, print_freq=100)
+        evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss, print_freq=5)
 
+    session.done()
     total_time = time.time() - start_time
 
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
