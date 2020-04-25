@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 
 
 def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch,
-                    metric_logger, graph_loss, print_freq=100):
+                    metric_logger, graph_loss, graph_acc, print_freq=100):
     logger.setLevel(logging.INFO)
 
     epoch_loss = 0.
@@ -48,4 +48,5 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
     metric_logger.add_scalar('loss/train', epoch_loss / len(dataloader), epoch)
     metric_logger.add_scalar('acc/train', epoch_acc / len(dataloader), epoch)
     graph_loss.append(epoch, {'train_loss': epoch_loss / len(dataloader)})
+    graph_acc.append(epoch, {'train_acc': epoch_acc / len(dataloader)})
     metric_logger.close()

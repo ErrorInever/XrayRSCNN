@@ -81,25 +81,27 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    # model = XrayRSCNN()
-    model = get_resnet_50_test()
+    model = XrayRSCNN()
+    #model = get_resnet_50_test()
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
+    #optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.8)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
     metric_logger = SummaryWriter()
-    graph_loss = session.graph('loss', kind='min')
-    #graph_accuracy = session.graph('accuracy', kind='max', display_interval=1)
+    graph_loss = session.graph('loss', kind='min', display_interval=1)
+    graph_accuracy = session.graph('accuracy', kind='max', display_interval=1)
 
     # ---- Train model -----
     start_time = time.time()
 
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
-                        device, epoch, metric_logger, graph_loss, print_freq=100)
-        evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss, print_freq=5)
+                        device, epoch, metric_logger, graph_loss, graph_accuracy, print_freq=100)
+        evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
+                 graph_accuracy, print_freq=5)
 
     session.done()
 

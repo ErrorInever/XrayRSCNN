@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_loss, print_freq=100):
+def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_loss, graph_acc, print_freq=100):
     logger.setLevel(logging.INFO)
 
     model.eval()
@@ -41,4 +41,5 @@ def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_l
     metric_logger.add_scalar('loss/eval', epoch_loss / len(dataloader), epoch)
     metric_logger.add_scalar('acc/eval', epoch_acc / len(dataloader), epoch)
     graph_loss.append(epoch, {'val_loss': epoch_loss / len(dataloader)})
+    graph_acc.append(epoch, {'val_acc': epoch_acc / len(dataloader)})
     metric_logger.close()
