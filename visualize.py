@@ -5,8 +5,8 @@ import numpy as np
 def show_batch(batch):
     images = batch[0]
     labels = batch[1]
-    std = [0.229, 0.224, 0.225]
-    mean = [0.485, 0.456, 0.406]
+    std = [0.9902, 1.0123, 1.0078]
+    mean = [-0.0136,  0.1156,  0.3373]
     fig, ax = plt.subplots(1, 5, figsize=(30, 10))
 
     for i, img in enumerate(images):
