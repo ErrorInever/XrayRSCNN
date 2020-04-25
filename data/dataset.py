@@ -29,5 +29,5 @@ class XRayDataset(Dataset):
 
     @property
     def img_to_tensor(self):
-        return transforms.Compose([transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406],
-                                                                               [0.229, 0.224, 0.225])])
+        return transforms.Compose([transforms.ToTensor(), transforms.Normalize([-0.0136,  0.1156,  0.3373],
+                                                                               [0.9902, 1.0123, 1.0078])])
