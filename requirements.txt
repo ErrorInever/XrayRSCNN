@@ -1,3 +1,4 @@
+losswise
 tensorboardX
 tqdm
 pandas
