@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 
 
 def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch,
-                    metric_logger, graph_loss, graph_acc, print_freq=100):
+                    metric_logger, graph_loss, graph_acc, transform, print_freq=100):
     logger.setLevel(logging.INFO)
 
     epoch_loss = 0.
@@ -16,6 +16,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
     model.train()
     for i, (image, label) in enumerate(dataloader):
         images = image.to(device)
+        images = transform(images)
         labels = label.to(device)
 
         optimizer.zero_grad()

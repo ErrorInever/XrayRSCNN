@@ -5,6 +5,7 @@ import time
 import torch
 import datetime
 import losswise
+import kornia
 from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
@@ -78,6 +79,13 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
     val_dataloader = DataLoader(val_dataset, batch_size=cfg.BATCH_SIZE)
 
+    train_transform = torch.nn.Sequential(
+        kornia.augmentation.RandomAffine(15),
+        kornia.augmentation.RandomRotation(15),
+        kornia.augmentation.RandomVerticalFlip(15),
+        kornia.augmentation.ColorJitter(1.0, 0.3, 0.3, 0.2)
+    )
+
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
@@ -86,8 +94,8 @@ if __name__ == '__main__':
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
-    #optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.8)
+    #optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
+    optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.8, weight_decay=5e-4)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
     metric_logger = SummaryWriter()
@@ -99,7 +107,7 @@ if __name__ == '__main__':
 
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
-                        device, epoch, metric_logger, graph_loss, graph_accuracy, print_freq=100)
+                        device, epoch, metric_logger, graph_loss, graph_accuracy, train_transform, print_freq=100)
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
 
