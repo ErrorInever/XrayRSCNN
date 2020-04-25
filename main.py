@@ -4,6 +4,7 @@ import logging
 import time
 import torch
 import datetime
+import losswise
 from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
@@ -18,6 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='X-ray-CNN')
     parser.add_argument('--root_dir', dest='root_dir', help='Path to root directory of dataset', default=None, type=str)
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
+    parser.add_argument('--api_key', dest='api_key', help='losswise api key', default=None, type=str)
     return parser.parse_args()
 
 
@@ -45,6 +47,9 @@ if __name__ == '__main__':
     logger.info('XrayPneumoniaCNN starts training {}'.format(time.ctime()))
     logger.info('Called with args: {}'.format(args.__dict__))
     logger.info('Config params:{}'.format(cfg.__dict__))
+
+    losswise.set_api_key(args.api_key)
+    session = losswise.Session(tag='x-ray-test')
 
     if torch.cuda.is_available() and not args.use_gpu:
         logger.info('You have a GPU device so you should probably run with --use_gpu')
