@@ -15,7 +15,7 @@ def test(model, dataloader, device):
 
         outputs = model(images)
         predict_classes = outputs.argmax(dim=1)
-        test_acc += (predict_classes == labels.data).float().mean()
+        test_acc += (predict_classes == labels.data).float().mean().item()
 
     test_acc = test_acc / len(dataloader)
 
