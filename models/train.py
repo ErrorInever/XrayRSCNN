@@ -1,10 +1,12 @@
 import logging
+from models.functions import make_checkpoint
+from config.conf import cfg
 
 logger = logging.getLogger(__name__)
 
 
 def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch,
-                    metric_logger, graph_loss, graph_acc, transform, print_freq=100):
+                    metric_logger, graph_loss, graph_acc, transform, save_dir, print_freq=100):
     logger.setLevel(logging.INFO)
 
     epoch_loss = 0.
@@ -49,3 +51,9 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
     graph_loss.append(epoch, {'train_loss': epoch_loss / len(dataloader)})
     graph_acc.append(epoch, {'train_acc': epoch_acc / len(dataloader)})
     metric_logger.close()
+
+    try:
+        if (epoch + 1) % cfg.SAVE_EPOCH_NUM == 0:
+            make_checkpoint(epoch, model, optimizer, scheduler, epoch_loss / len(dataloader), save_dir)
+    except Exception:
+        logger.info('Save error')

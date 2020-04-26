@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('--root_dir', dest='root_dir', help='Path to root directory of dataset', default=None, type=str)
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
     parser.add_argument('--api_key', dest='api_key', help='losswise api key', default=None, type=str)
+    parser.add_argument('--out_dir', dest='out_dir', help='Path to out directory', default=None, type=str)
     return parser.parse_args()
 
 
@@ -31,6 +32,7 @@ if __name__ == '__main__':
 
     args = parse_args()
     assert args.root_dir, 'Root directory not specified'
+    assert args.out_dir, 'Out directory not specified'
 
     logger = logging.getLogger()
 
@@ -109,7 +111,8 @@ if __name__ == '__main__':
 
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
-                        device, epoch, metric_logger, graph_loss, graph_accuracy, train_transform, print_freq=100)
+                        device, epoch, metric_logger, graph_loss, graph_accuracy,
+                        train_transform, args.outdir, print_freq=100)
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
     test(model, test_dataloader, device)

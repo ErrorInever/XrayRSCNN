@@ -28,16 +28,16 @@ def save_checkpoint(state, filename):
     torch.save(state, filename)
 
 
-def make_checkpoint(epoch, model, optimizer, scheduler, loss_value, test_acc, outdir):
-    save_name = os.path.join(outdir, 'xrayscnn_ep{}_acc{}.pth'.format(epoch, test_acc))
+def make_checkpoint(epoch, model, optimizer, scheduler, loss_value, outdir):
+    save_name = os.path.join(outdir, 'xrayscnn_ep{}.pth'.format(epoch))
     save_checkpoint({
         'start_epoch': epoch + 1,
         'model': model.state_dict(),
         'optimizer': optimizer.state_dict(),
         'scheduler': scheduler.state_dict(),
-        'losses': loss_value,
-        'test_acc': test_acc
+        'losses': loss_value
     }, save_name)
+    print('Save model: {}'.format(save_name))
 
 
 def load_checkpoint(state, model, optimizer, scheduler):
