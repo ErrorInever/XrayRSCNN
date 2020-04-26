@@ -112,7 +112,7 @@ if __name__ == '__main__':
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
                         device, epoch, metric_logger, graph_loss, graph_accuracy,
-                        train_transform, args.outdir, print_freq=100)
+                        train_transform, args.out_dir, print_freq=100)
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
     test(model, test_dataloader, device)
