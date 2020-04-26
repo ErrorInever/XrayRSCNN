@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 
 def test(model, dataloader, device):
     logger.setLevel(logging.INFO)
+    logger.info('--------START TEST MODEL---------')
     model.eval()
     test_acc = 0.
     for images, labels in tqdm(dataloader, total=len(dataloader)):

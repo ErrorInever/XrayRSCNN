@@ -13,6 +13,8 @@ from torch.utils.data import DataLoader
 from models.model import XraySCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
+from models.test import test
+from models import functions
 from tensorboardX import SummaryWriter
 
 
@@ -25,6 +27,8 @@ def parse_args():
 
 
 if __name__ == '__main__':
+    functions.set_seed(10)
+
     args = parse_args()
     assert args.root_dir, 'Root directory not specified'
 
@@ -108,6 +112,7 @@ if __name__ == '__main__':
                         device, epoch, metric_logger, graph_loss, graph_accuracy, train_transform, print_freq=100)
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
+    test(model, test_dataloader, device)
 
     session.done()
 
