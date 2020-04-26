@@ -80,9 +80,9 @@ if __name__ == '__main__':
     val_dataloader = DataLoader(val_dataset, batch_size=cfg.BATCH_SIZE)
 
     train_transform = torch.nn.Sequential(
-        kornia.augmentation.RandomAffine(15),
-        kornia.augmentation.RandomRotation(15),
-        kornia.augmentation.RandomVerticalFlip(15),
+        kornia.augmentation.RandomAffine(15.),
+        kornia.augmentation.RandomRotation(15.),
+        kornia.augmentation.RandomVerticalFlip(15.),
         kornia.augmentation.ColorJitter(1.0, 0.3, 0.3, 0.2)
     )
 
