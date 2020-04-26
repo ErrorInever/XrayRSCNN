@@ -13,7 +13,7 @@ def load_model(model, filepath):
 
 def save_model(model, filepath):
     """save model for test"""
-    torch.save(model.state_dict(), filepath)
+    torch.save(model.state_dict(), os.path.join(filepath, 'xray.pth'))
 
 
 def set_seed(val):
