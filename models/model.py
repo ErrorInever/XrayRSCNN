@@ -225,6 +225,10 @@ def get_resnet_50_test(num_class=2, pretrained=True):
         param.requires_grad = False
 
     num_features = model_ft.fc.in_features
-    model_ft.fc = nn.Linear(num_features, num_class)
+
+    model_ft.fc = nn.Sequential(
+        nn.Dropout(0.15),
+        nn.Linear(num_features, num_class)
+    )
 
     return model_ft

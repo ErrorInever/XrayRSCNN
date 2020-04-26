@@ -10,7 +10,7 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from models.model import XrayRSCNN, get_resnet_50_test
+from models.model import XraySCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
 from tensorboardX import SummaryWriter
@@ -89,14 +89,12 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    model = XrayRSCNN()
-    #model = get_resnet_50_test()
+    model = XraySCNN()
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
-    #optimizer = torch.optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
     optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.8, weight_decay=5e-4)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
     metric_logger = SummaryWriter()
     graph_loss = session.graph('loss', kind='min', display_interval=1)
