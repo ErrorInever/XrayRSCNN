@@ -5,6 +5,17 @@ import numpy as np
 from torch import nn
 
 
+def load_model(model, filepath):
+    """load model for test"""
+    model.load_state_dict(torch.load(filepath))
+    model.eval()
+
+
+def save_model(model, filepath):
+    """save model for test"""
+    torch.save(model.state_dict(), filepath)
+
+
 def set_seed(val):
     """freeze random sequences"""
     random.seed(val)

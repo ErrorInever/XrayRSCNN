@@ -116,6 +116,7 @@ if __name__ == '__main__':
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
     test(model, test_dataloader, device)
+    functions.save_model(model, args.out_dir)
 
     session.done()
 
