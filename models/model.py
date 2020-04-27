@@ -218,6 +218,83 @@ class XraySCNN(nn.Module):
         return x
 
 
+class XrayCNN(nn.Module):
+
+    def __init__(self, num_classes=2, act_type='relu'):
+        super().__init__()
+
+        self.conv_1 = nn.Conv2d(3, 32, 3, 1, 1, bias=False)
+        self.bn_1 = nn.BatchNorm2d(32)
+        self.act_1 = activation_func(act_type)
+        self.maxpool_1 = nn.MaxPool2d(2, 2)
+
+        self.conv_2 = nn.Conv2d(32, 64, 3, 1, 1, bias=False)
+        self.bn_2 = nn.BatchNorm2d(64)
+        self.act_2 = activation_func(act_type)
+        self.maxpool_2 = nn.MaxPool2d(2, 2)
+
+        self.conv_3 = nn.Conv2d(64, 128, 3, 1, 1, bias=False)
+        self.bn_3 = nn.BatchNorm2d(128)
+        self.act_3 = activation_func(act_type)
+        self.maxpool_3 = nn.MaxPool2d(2, 2)
+
+        self.conv_4 = nn.Conv2d(128, 128, 3, 1, 1, bias=False)
+        self.bn_4 = nn.BatchNorm2d(128)
+        self.act_4 = activation_func(act_type)
+        self.maxpool_4 = nn.MaxPool2d(2, 2)
+
+        self.conv_5 = nn.Conv2d(128, 128, 3, 1, 1, bias=False)
+        self.bn_5 = nn.BatchNorm2d(128)
+        self.act_5 = activation_func(act_type)
+        self.maxpool_5 = nn.MaxPool2d(2, 2)
+
+        self.classifier = nn.Sequential(
+            nn.Linear(6272, 2048),
+            nn.Dropout(0.7),
+            nn.Linear(2048, 1024),
+            nn.Dropout(0.5),
+            nn.Linear(1024, num_classes)
+        )
+
+        self.sm = nn.Softmax(dim=1)
+
+    def forward(self, x):
+        x = self.conv_1(x)
+        x = self.bn_1(x)
+        x = self.act_1(x)
+        x = self.maxpool_1(x)
+
+        x = self.conv_2(x)
+        x = self.bn_2(x)
+        x = self.act_2(x)
+        x = self.maxpool_2(x)
+
+        x = self.conv_3(x)
+        x = self.bn_3(x)
+        x = self.act_3(x)
+        x = self.maxpool_3(x)
+
+        x = self.conv_4(x)
+        x = self.bn_4(x)
+        x = self.act_4(x)
+        x = self.maxpool_4(x)
+
+        x = self.conv_5(x)
+        x = self.bn_5(x)
+        x = self.act_5(x)
+        x = self.maxpool_5(x)
+
+        x = x.view(x.size(0), -1)
+        x = self.classifier(x)
+
+        return x
+
+    def inference(self, x):
+        x = self.forward(x)
+        x = self.sm(x)
+        return x
+
+
 def get_resnet_50_test(num_class=2, pretrained=True):
     model_ft = torchvision.models.resnet50(pretrained=pretrained)
 
