@@ -10,7 +10,7 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from models.model import XraySCNN
+from models.model import XraySCNN, XrayCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
 from models.test import test
@@ -85,13 +85,6 @@ if __name__ == '__main__':
     test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
     val_dataloader = DataLoader(val_dataset, batch_size=cfg.BATCH_SIZE)
 
-    train_transform = torch.nn.Sequential(
-        kornia.augmentation.RandomAffine(15.),
-        kornia.augmentation.RandomRotation(15.),
-        kornia.augmentation.RandomVerticalFlip(15.),
-        kornia.augmentation.ColorJitter(1.0, 0.3, 0.3, 0.2)
-    )
-
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
@@ -111,8 +104,7 @@ if __name__ == '__main__':
 
     for epoch in range(cfg.NUM_EPOCHS):
         train_one_epoch(model, train_dataloader, optimizer, criterion, scheduler,
-                        device, epoch, metric_logger, graph_loss, graph_accuracy,
-                        train_transform, args.out_dir, print_freq=100)
+                        device, epoch, metric_logger, graph_loss, graph_accuracy, args.out_dir, print_freq=100)
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
     test(model, test_dataloader, device)

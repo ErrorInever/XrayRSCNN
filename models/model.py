@@ -100,14 +100,23 @@ class XrayRSCNN(nn.Module):
         self.block1 = Block(64, 128, 1, 2, activation_first=True, grow_first=True)
         self.block2 = Block(128, 256, 1, 2, activation_first=True, grow_first=True)
         self.block3 = Block(256, 256, 3, 1, activation_first=True, grow_first=True)
-        self.block4 = Block(256, 512, 1, 2, activation_first=True, grow_first=True)
-        self.block5 = Block(512, 512, 2, 1, activation_first=True, grow_first=False)
+        self.block4 = Block(256, 256, 3, 1, activation_first=True, grow_first=True)
+        self.block5 = Block(256, 512, 1, 2, activation_first=True, grow_first=False)
+        self.block6 = Block(512, 512, 3, 1, activation_first=True, grow_first=False)
+        self.block7 = Block(512, 512, 3, 1, activation_first=True, grow_first=False)
 
+        self.maxpool_1 = nn.MaxPool2d(2, 2)
         self.conv5 = DepthwiseSeparableConv(512, 1024, 3, 1, 1)
         self.bn2 = nn.BatchNorm2d(1024)
         self.activation1 = activation_func(act_type)
-        self.fc1 = nn.Linear(1024, 512)
-        self.fc2 = nn.Linear(512, num_classes)
+
+        self.classifier = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.Dropout(0.3),
+            nn.Linear(512, 256),
+            nn.Dropout(0.1),
+            nn.Linear(256, num_classes)
+        )
 
         self.sm = nn.Softmax(dim=1)
 
@@ -119,15 +128,17 @@ class XrayRSCNN(nn.Module):
         x = self.block3(x)
         x = self.block4(x)
         x = self.block5(x)
+        x = self.block6(x)
+        x = self.block7(x)
 
+        x = self.maxpool_1(x)
         x = self.conv5(x)
         x = self.bn2(x)
         x = self.activation1(x)
 
         x = F.adaptive_avg_pool2d(x, (1, 1))
         x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        x = self.fc2(x)
+        x = self.classifier(x)
 
         return x
 
