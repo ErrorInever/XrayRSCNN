@@ -1,13 +1,14 @@
 import torch
-from PIL import Image
+import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
 from torchvision import transforms
+import cv2
 
 
 class XRayDataset(Dataset):
     """X-Ray dataset"""
 
-    def __init__(self, df, transforms=True):
+    def __init__(self, df, transforms=None):
         """
         :param df: ``DataFrame`` with columns [img_path, label]
         :param transforms: if True then allow to transform
@@ -18,9 +19,10 @@ class XRayDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.df.iloc[idx, 0]
         label = torch.tensor([0]) if self.df.iloc[idx, 1] == 'NORMAL' else torch.tensor([1])
-        img = Image.open(img_path).convert('RGB')
-        if transforms:
-            img = self.img_to_tensor(img)
+        img = cv2.imread(img_path)
+
+        if self.transforms:
+            img = self.transform(img)
 
         return img, label
 
@@ -28,6 +30,17 @@ class XRayDataset(Dataset):
         return len(self.df)
 
     @property
-    def img_to_tensor(self):
-        return transforms.Compose([transforms.ToTensor(), transforms.Normalize([-0.0136,  0.1156,  0.3373],
-                                                                               [0.9902, 1.0123, 1.0078])])
+    def transform(self):
+        return transforms.Compose([
+            iaa.Sequential([
+                iaa.Sometimes(0.25, iaa.GaussianBlur(sigma=(0, 4.0))),
+                iaa.Fliplr(0.2),
+                iaa.Affine(rotate=(-20, 20), mode='symmetric'),
+                iaa.Multiply(0.50),
+                iaa.Sometimes(0.25, iaa.OneOf([iaa.Dropout(p=(0, 0.1)),
+                                               iaa.CoarseDropout(0.1, size_percent=0.5)
+                                               ])),
+                iaa.AddToHueAndSaturation(value=(-10, 10), per_channel=True),
+                iaa.Sometimes(0.10, iaa.SaltAndPepper(0.03), iaa.LogContrast(gain=0.5))
+            ]).augment_image,
+            transforms.ToTensor()])
