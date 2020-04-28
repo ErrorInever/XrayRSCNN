@@ -43,4 +43,7 @@ class XRayDataset(Dataset):
                 iaa.AddToHueAndSaturation(value=(-10, 10), per_channel=True),
                 iaa.Sometimes(0.10, iaa.SaltAndPepper(0.03), iaa.LogContrast(gain=0.5))
             ]).augment_image,
-            transforms.ToTensor()])
+            transforms.ToTensor(),
+            #transforms.Normalize(mean=[0.1581, 0.1562, 0.1562], std=[0.0756, 0.0751, 0.0751])
+            #transforms.Normalize(mean=[0.4819, 0.4819, 0.4819], std=[0.2396, 0.2396, 0.2396])
+        ])

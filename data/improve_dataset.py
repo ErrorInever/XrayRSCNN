@@ -2,6 +2,7 @@ import os
 import collections
 import imgaug.augmenters as iaa
 import cv2
+import torch
 import logging
 from tqdm import tqdm
 

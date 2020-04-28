@@ -9,7 +9,7 @@ from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
-from models.model import XraySCNN, XrayCNN
+from models.model import XrayRSCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
 from models.test import test
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    model = XraySCNN()
+    model = XrayRSCNN()
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
@@ -107,6 +107,7 @@ if __name__ == '__main__':
         evaluate(model, val_dataloader, criterion, device, epoch, metric_logger, graph_loss,
                  graph_accuracy, print_freq=5)
     test(model, test_dataloader, device)
+
     functions.save_model(model, args.out_dir)
 
     session.done()
