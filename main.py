@@ -5,7 +5,6 @@ import time
 import torch
 import datetime
 import losswise
-import kornia
 from config.conf import cfg
 from data.dataset import XRayDataset
 from utils.parse import get_data_frame
@@ -57,10 +56,10 @@ if __name__ == '__main__':
 
     losswise.set_api_key(args.api_key)
     session = losswise.Session(tag='x-ray-test',
-                               params={'Adam learning rate': cfg.LEARNING_RATE,
-                                       'Scheduler gamma': 0.1},
-                               max_iter=cfg.NUM_EPOCHS,
-                               track_git=False)
+                                   params={'Adam learning rate': cfg.LEARNING_RATE,
+                                           'Scheduler gamma': 0.1},
+                                   max_iter=cfg.NUM_EPOCHS,
+                                   track_git=False)
 
     if torch.cuda.is_available() and not args.use_gpu:
         logger.info('You have a GPU device so you should probably run with --use_gpu')

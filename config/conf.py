@@ -4,7 +4,7 @@ __C = edict()
 # for consumers
 cfg = __C
 
-__C.PATH_TO_LOG_FILE = r'XrayRSCNN/logs/logs.log'
+__C.PATH_TO_LOG_FILE = r'logs/logs.log'
 __C.OUT_DIR = 'out'
 # TRAIN
 __C.NUM_EPOCHS = 10
