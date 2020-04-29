@@ -92,6 +92,7 @@ if __name__ == '__main__':
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.8, weight_decay=5e-4)
+
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
     metric_logger = SummaryWriter()
