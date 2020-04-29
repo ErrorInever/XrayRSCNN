@@ -173,11 +173,11 @@ class SimpleCNN(nn.Module):
         self.maxpool4 = nn.MaxPool2d(2, 2)
 
         self.classifier = nn.Sequential(
-            nn.Linear(128 * 14 * 14, 4096),
+            nn.Linear(128, 64),
             nn.ReLU(inplace=True),
-            nn.Linear(4096, 4096),
+            nn.Linear(64, 64),
             nn.ReLU(inplace=True),
-            nn.Linear(4096, 2)
+            nn.Linear(64, 2)
         )
 
         self.sm = nn.Softmax(dim=1)
