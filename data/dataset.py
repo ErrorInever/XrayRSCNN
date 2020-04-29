@@ -23,6 +23,11 @@ class XRayDataset(Dataset):
 
         if self.transforms:
             img = self.transform(img)
+        else:
+            val_transform = transforms.Compose([
+                transforms.ToTensor()
+            ])
+            img = val_transform(img)
 
         return img, label
 
