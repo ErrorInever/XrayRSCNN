@@ -110,7 +110,6 @@ if __name__ == '__main__':
     test(model, test_dataloader, device)
 
     functions.save_model(model, args.out_dir)
-
     session.done()
 
     total_time = time.time() - start_time

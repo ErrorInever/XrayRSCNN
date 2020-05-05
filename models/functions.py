@@ -2,11 +2,16 @@ import torch
 import os
 import random
 import numpy as np
+import logging
 from torch import nn
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def load_model(model, filepath):
     """load model for test"""
+    logger.info('Loading model...')
     model.load_state_dict(torch.load(filepath))
     model.eval()
 
