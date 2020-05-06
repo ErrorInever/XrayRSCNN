@@ -75,20 +75,9 @@ if __name__ == '__main__':
     logger.info('Creates datasets')
 
     train_transform = transforms.Compose([
-        iaa.Sequential([
-            iaa.Sometimes(0.25, iaa.GaussianBlur(sigma=(0, 4.0))),
-            iaa.Fliplr(0.2),
-            iaa.Affine(rotate=(-20, 20), mode='symmetric'),
-            iaa.Multiply(0.50),
-            iaa.Sometimes(0.25, iaa.OneOf([iaa.Dropout(p=(0, 0.1)),
-                                           iaa.CoarseDropout(0.1, size_percent=0.5)
-                                           ])),
-            iaa.AddToHueAndSaturation(value=(-10, 10), per_channel=True),
-            iaa.Sometimes(0.10, iaa.SaltAndPepper(0.03), iaa.LogContrast(gain=0.5))
-        ]).augment_image,
+        transforms.RandomAffine(0, translate=(0, 0.1), scale=(1, 1.10)),
+        transforms.RandomRotation((-20, 20)),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=[0.1581, 0.1562, 0.1562], std=[0.0756, 0.0751, 0.0751])
-        #transforms.Normalize(mean=[0.4819, 0.4819, 0.4819], std=[0.2396, 0.2396, 0.2396])
     ])
 
     transform = torchvision.transforms.Compose(

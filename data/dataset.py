@@ -7,6 +7,7 @@ import cv2
 
 
 class XrayImageFolder(ImageFolder):
+
     def __getitem__(self, index):
         sample, target = super().__getitem__(index)
         path, _ = self.samples[index]
