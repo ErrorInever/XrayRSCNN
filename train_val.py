@@ -29,7 +29,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    functions.set_seed(10)
+    functions.set_seed(42)
 
     args = parse_args()
     assert args.root_dir, 'Root directory not specified'
