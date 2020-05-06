@@ -116,13 +116,13 @@ class XrayRSCNN(nn.Module):
         self.maxpool_1 = nn.MaxPool2d(2, 2)
 
         self.classifier = nn.Sequential(
-            nn.Linear(256 * 7 * 7, 2048),
+            nn.Linear(256 * 7 * 7, 2048, bias=True),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.7),
+            nn.Linear(2048, 2048, bias=True),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.5),
-            nn.Linear(2048, 2048),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.5),
-            nn.Linear(2048, num_classes)
+            nn.Linear(2048, num_classes, bias=True)
         )
 
         self.sm = nn.Softmax(dim=1)
