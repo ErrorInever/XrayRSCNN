@@ -5,8 +5,9 @@ import time
 import torch
 import datetime
 import losswise
+import torchvision
 from config.conf import cfg
-from data.dataset import XRayDataset
+from data.dataset import XRayDataset, XrayImageFolder
 from utils.parse import get_data_frame
 from torch.utils.data import DataLoader
 from models.model import XrayRSCNN
@@ -72,13 +73,21 @@ if __name__ == '__main__':
     logger.info('Running with device %s', device)
     logger.info('Creates datasets')
 
-    train_df = get_data_frame(os.path.join(args.root_dir, 'train'))
-    test_df = get_data_frame(os.path.join(args.root_dir, 'test'))
-    val_df = get_data_frame(os.path.join(args.root_dir, 'val'))
+    # train_df = get_data_frame(os.path.join(args.root_dir, 'train'))
+    # test_df = get_data_frame(os.path.join(args.root_dir, 'test'))
+    # val_df = get_data_frame(os.path.join(args.root_dir, 'val'))
+    #
+    # train_dataset = XRayDataset(train_df, transforms=True)
+    # test_dataset = XRayDataset(test_df)
+    # val_dataset = XRayDataset(val_df)
 
-    train_dataset = XRayDataset(train_df, transforms=True)
-    test_dataset = XRayDataset(test_df)
-    val_dataset = XRayDataset(val_df)
+    transform = torchvision.transforms.Compose(
+        [torchvision.transforms.ToTensor()]
+    )
+
+    train_dataset = XrayImageFolder(os.path.join(args.root_dir, 'train'), transform=transform)
+    val_dataset = XrayImageFolder(os.path.join(args.root_dir, 'val'), transform=transform)
+    test_dataset = XrayImageFolder(os.path.join(args.root_dir, 'test'), transform=transform)
 
     train_dataloader = DataLoader(train_dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=cfg.BATCH_SIZE)
     test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)

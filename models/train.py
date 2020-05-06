@@ -23,7 +23,8 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
         optimizer.zero_grad()
 
         outputs = model(images)
-        loss = criterion(outputs, labels.squeeze())
+        # loss = criterion(outputs, labels.squeeze())
+        loss = criterion(outputs, labels)
         loss.backward()
 
         optimizer.step()

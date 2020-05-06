@@ -2,7 +2,18 @@ import torch
 import imgaug.augmenters as iaa
 from torch.utils.data import Dataset
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
 import cv2
+
+
+class XrayImageFolder(ImageFolder):
+    def __getitem__(self, index):
+        sample, target = super().__getitem__(index)
+        path, _ = self.samples[index]
+
+        target = 0 if 'NORMAL' in path else 1
+
+        return sample, target
 
 
 class XRayDataset(Dataset):

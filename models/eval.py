@@ -20,9 +20,11 @@ def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_l
 
         outputs = model(images)
         try:
-            loss = criterion(outputs, labels.squeeze())
+            # loss = criterion(outputs, labels.squeeze())
+            loss = criterion(outputs, labels)
         except IndexError:
-            loss = criterion(outputs, labels.squeeze(0))
+            # loss = criterion(outputs, labels.squeeze(0))
+            logger.exception('INDEX ERROR')
         finally:
             running_loss += loss.item()
             running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
