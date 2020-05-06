@@ -19,24 +19,20 @@ def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_l
         labels = label.to(device)
 
         outputs = model(images)
-        try:
-            # loss = criterion(outputs, labels.squeeze())
-            loss = criterion(outputs, labels)
-        except IndexError:
-            # loss = criterion(outputs, labels.squeeze(0))
-            logger.exception('INDEX ERROR')
-        finally:
-            running_loss += loss.item()
-            running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
 
-            epoch_loss += loss.item()
-            epoch_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
+        loss = criterion(outputs, labels)
 
-            if (i % print_freq == 0) and i != 0:
-                logger.info('Evaluate [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
-                            running_loss / print_freq, running_acc / print_freq)
-                running_loss = 0.
-                running_acc = 0.
+        running_loss += loss.item()
+        running_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
+
+        epoch_loss += loss.item()
+        epoch_acc += (outputs.argmax(dim=1) == labels).float().mean().item()
+
+        if (i % print_freq == 0) and i != 0:
+            logger.info('Evaluate [%s, %s] Loss: %s | Acc: %s', epoch + 1, i + 1,
+                        running_loss / print_freq, running_acc / print_freq)
+            running_loss = 0.
+            running_acc = 0.
 
     logger.info('----------EVAL EPOCH [%s] | LOSS: %s | EPOCH ACC: %s ---------', epoch + 1,
                 epoch_loss / len(dataloader), epoch_acc / len(dataloader))

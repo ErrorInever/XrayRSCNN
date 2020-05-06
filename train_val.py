@@ -6,9 +6,10 @@ import torch
 import datetime
 import losswise
 import torchvision
+import imgaug.augmenters as iaa
+from torchvision import transforms
 from config.conf import cfg
-from data.dataset import XRayDataset, XrayImageFolder
-from utils.parse import get_data_frame
+from data.dataset import XrayImageFolder
 from torch.utils.data import DataLoader
 from models.model import XrayRSCNN
 from models.train import train_one_epoch
@@ -73,19 +74,28 @@ if __name__ == '__main__':
     logger.info('Running with device %s', device)
     logger.info('Creates datasets')
 
-    # train_df = get_data_frame(os.path.join(args.root_dir, 'train'))
-    # test_df = get_data_frame(os.path.join(args.root_dir, 'test'))
-    # val_df = get_data_frame(os.path.join(args.root_dir, 'val'))
-    #
-    # train_dataset = XRayDataset(train_df, transforms=True)
-    # test_dataset = XRayDataset(test_df)
-    # val_dataset = XRayDataset(val_df)
+    train_transform = transforms.Compose([
+        iaa.Sequential([
+            iaa.Sometimes(0.25, iaa.GaussianBlur(sigma=(0, 4.0))),
+            iaa.Fliplr(0.2),
+            iaa.Affine(rotate=(-20, 20), mode='symmetric'),
+            iaa.Multiply(0.50),
+            iaa.Sometimes(0.25, iaa.OneOf([iaa.Dropout(p=(0, 0.1)),
+                                           iaa.CoarseDropout(0.1, size_percent=0.5)
+                                           ])),
+            iaa.AddToHueAndSaturation(value=(-10, 10), per_channel=True),
+            iaa.Sometimes(0.10, iaa.SaltAndPepper(0.03), iaa.LogContrast(gain=0.5))
+        ]).augment_image,
+        transforms.ToTensor(),
+        #transforms.Normalize(mean=[0.1581, 0.1562, 0.1562], std=[0.0756, 0.0751, 0.0751])
+        #transforms.Normalize(mean=[0.4819, 0.4819, 0.4819], std=[0.2396, 0.2396, 0.2396])
+    ])
 
     transform = torchvision.transforms.Compose(
         [torchvision.transforms.ToTensor()]
     )
 
-    train_dataset = XrayImageFolder(os.path.join(args.root_dir, 'train'), transform=transform)
+    train_dataset = XrayImageFolder(os.path.join(args.root_dir, 'train'), transform=train_transform)
     val_dataset = XrayImageFolder(os.path.join(args.root_dir, 'val'), transform=transform)
     test_dataset = XrayImageFolder(os.path.join(args.root_dir, 'test'), transform=transform)
 
@@ -102,7 +112,7 @@ if __name__ == '__main__':
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.9, weight_decay=5e-4)
 
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     metric_logger = SummaryWriter()
     graph_loss = session.graph('loss', kind='min', display_interval=1)

@@ -17,13 +17,17 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
 
     model.train()
     for i, (image, label) in enumerate(dataloader):
+
+        # skips incomplete batches
+        if len(image) != cfg.BATCH_SIZE:
+            continue
+
         images = image.to(device)
         labels = label.to(device)
 
         optimizer.zero_grad()
 
         outputs = model(images)
-        # loss = criterion(outputs, labels.squeeze())
         loss = criterion(outputs, labels)
         loss.backward()
 
@@ -56,4 +60,4 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
         if (epoch + 1) % cfg.SAVE_EPOCH_NUM == 0:
             make_checkpoint(epoch, model, optimizer, scheduler, epoch_loss / len(dataloader), save_dir)
     except Exception:
-        logger.info('Save error')
+        logger.info('checkpoint error')
