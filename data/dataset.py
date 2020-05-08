@@ -1,9 +1,30 @@
 import torch
+import os
+import cv2
 import imgaug.augmenters as iaa
+from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
-import cv2
+
+
+class Images(Dataset):
+
+    def __init__(self, img_path):
+        self.img_path = img_path
+        self.img_names = [n for n in os.listdir(img_path)]
+
+    def __getitem__(self, idx):
+        img = Image.open(os.path.join(self.img_path, self.img_names[idx])).convert('RGB')
+        img = self.transform(img)
+        return img
+
+    def __len__(self):
+        return len(self.img_names)
+
+    @property
+    def transform(self):
+        return transforms.Compose([transforms.ToTensor()])
 
 
 class XrayImageFolder(ImageFolder):
