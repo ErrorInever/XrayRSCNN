@@ -19,7 +19,7 @@ from tensorboardX import SummaryWriter
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='X-ray-CNN')
+    parser = argparse.ArgumentParser(description='X-ray-RCNN')
     parser.add_argument('--root_dir', dest='root_dir', help='Path to root directory of dataset', default=None, type=str)
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
     parser.add_argument('--api_key', dest='api_key', help='losswise api key', default=None, type=str)
