@@ -66,7 +66,7 @@ def test(model, dataloader, device):
 
     recall, precision, f1_score = get_cls_metrics(true_labels, pred_labels)
 
-    logger.info('Test accuracy: %s', round(test_acc, 2))
-    logger.info('Recall: %s | Precision: %s | F1_SCORE %s', recall, precision, f1_score)
+    logger.info('Accuracy: %s\nRecall: %s\nPrecision: %s\nF1-SCORE %s\n', round(100 * test_acc, 2),
+                round(100 * recall, 2), round(100 * precision, 2), round(100 * f1_score, 2))
 
 
