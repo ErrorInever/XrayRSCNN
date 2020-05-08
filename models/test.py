@@ -1,5 +1,4 @@
 import logging
-import seaborn as sns
 from tqdm import tqdm
 from sklearn.metrics import confusion_matrix
 
@@ -27,9 +26,10 @@ def test(model, dataloader, device):
         true_labels.append(labels.detach().cpu())
         pred_labels.append(predict_classes.detach().cpu())
 
+    cm = confusion_matrix(true_labels, pred_labels)
+
     test_acc = test_acc / len(dataloader)
 
-    cm = confusion_matrix(true_labels, pred_labels)
     tn, fp, fn, tp = cm.ravel()
 
     recall = tp / (tp + fn)
@@ -39,7 +39,4 @@ def test(model, dataloader, device):
     logger.info('Test accuracy: %s', round(test_acc, 2))
     logger.info('Recall: %s | Precision: %s | F1_SCORE %s', recall, precision, f1_score)
 
-    svm = sns.heatmap(cm, annot=True, fmt="d")
-    fig = svm.get_figure()
-    fig.savefig('heatmap.png', dpi=400)
 
