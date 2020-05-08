@@ -1,22 +1,26 @@
 import logging
 import argparse
 import torch
+import torchvision
 from tqdm import tqdm
 from datetime import datetime
 from models.model import XrayRSCNN
 from models.functions import load_model
 from config.conf import cfg
-from data.dataset import Images
+from data.dataset import Images, XrayImageFolder
 from torch.utils.data import DataLoader
+from models.test import test
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='X-ray-CNN')
+    parser = argparse.ArgumentParser(description='X-ray-RCNN')
     parser.add_argument('--weight_path', dest='weight', help='Path to directory where weights of model stored',
                         default=None, type=str)
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
-    parser.add_argument('--get_metrics', dest='get_metrics', help='get confusion matrix', action='store_true')
-    parser.add_argument('--data_path', dest='data_path', help='Path to directory where data stored', default=None,
+    parser.add_argument('--test', dest='test', help='get confusion matrix, f-score', action='store_true')
+    parser.add_argument('--test_data', dest='test_data', help='Path to test images folder', default=None, type=str)
+    parser.add_argument('--inference', dest='inference', help='inference mode', action='store_true')
+    parser.add_argument('--data_path', dest='data_path', help='Path to directory where images stored', default=None,
                         type=str)
 
     return parser.parse_args()
@@ -25,7 +29,12 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     assert args.weight, 'weight path not specified'
-    assert args.data_path, 'data path not specified'
+    if args.inference:
+        assert args.data_path, 'data path not specified'
+    if args.test:
+        assert args.test_data, 'test data path not specified'
+    if args.inference is None and args.test is None:
+        raise NameError('arguments --inference and --test - not specified')
 
     logger = logging.getLogger()
 
@@ -57,15 +66,26 @@ if __name__ == '__main__':
 
     logger.info('Running with device %s', device)
 
-    img_dataset = Images(args.data_path)
-    img_dataloader = DataLoader(img_dataset, batch_size=10, shuffle=False, num_workers=4)
+    if args.test:
+        transform = torchvision.transforms.Compose(
+            [torchvision.transforms.ToTensor()]
+        )
+        test_dataset = XrayImageFolder(args.test_data, transform=transform)
+        test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
+        test(model, test_dataloader, device)
 
-    logger.info('Images loaded: %s', len(img_dataset))
-    start_time = datetime.now()
-
-    for img in tqdm(img_dataloader, total=len(img_dataloader)):
-        images = img.to(device)
-
-        with torch.no_grad():
-            outputs = model(images)
-            # TODO
+    # img_dataset = Images(args.data_path)
+    # img_dataloader = DataLoader(img_dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=4)
+    #
+    # logger.info('Images loaded: %s', len(img_dataset))
+    # start_time = datetime.now()
+    #
+    # for img in tqdm(img_dataloader, total=len(img_dataloader)):
+    #     images = img.to(device)
+    #
+    #     with torch.no_grad():
+    #         outputs = model(images)
+    #         # TODO
+    # end_time = datetime.now()
+    # logger.info('Detection %s images finished in %s seconds', len(img_dataset),
+    #             (end_time - start_time).total_seconds())
