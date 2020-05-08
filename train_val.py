@@ -6,7 +6,6 @@ import torch
 import datetime
 import losswise
 import torchvision
-import imgaug.augmenters as iaa
 from torchvision import transforms
 from config.conf import cfg
 from data.dataset import XrayImageFolder
@@ -25,6 +24,7 @@ def parse_args():
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
     parser.add_argument('--api_key', dest='api_key', help='losswise api key', default=None, type=str)
     parser.add_argument('--out_dir', dest='out_dir', help='Path to out directory', default=None, type=str)
+    parser.add_argument('--save_model', dest='save_model', help='save model', action='store_true')
     return parser.parse_args()
 
 
@@ -58,8 +58,6 @@ if __name__ == '__main__':
 
     losswise.set_api_key(args.api_key)
     session = losswise.Session(tag='x-ray-test',
-                                   params={'Adam learning rate': cfg.LEARNING_RATE,
-                                           'Scheduler gamma': 0.1},
                                    max_iter=cfg.NUM_EPOCHS,
                                    track_git=False)
 
@@ -99,9 +97,10 @@ if __name__ == '__main__':
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=0.9, weight_decay=0.001)
+    optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=cfg.MOMENTUM,
+                                weight_decay=cfg.WEIGHT_DECAY)
 
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=cfg.STEP_SIZE, gamma=cfg.GAMMA)
 
     metric_logger = SummaryWriter()
     graph_loss = session.graph('loss', kind='min', display_interval=1)
@@ -117,7 +116,9 @@ if __name__ == '__main__':
                  graph_accuracy, print_freq=5)
     test(model, test_dataloader, device)
 
-    functions.save_model(model, args.out_dir)
+    if args.save_model:
+        functions.save_model(model, args.out_dir)
+
     session.done()
 
     total_time = time.time() - start_time
