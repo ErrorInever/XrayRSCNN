@@ -14,6 +14,7 @@ def load_model(model, filepath):
     logger.info('Loading model...')
     model.load_state_dict(torch.load(filepath))
     model.eval()
+    return model
 
 
 def save_model(model, filepath):
