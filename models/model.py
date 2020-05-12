@@ -151,63 +151,51 @@ class XrayRSCNN(nn.Module):
         return x
 
 
-class SimpleCNN(nn.Module):
+class DeepXrayRCNN(nn.Module):
 
-    def __init__(self):
+    def __init__(self, num_classes=2, act_type='relu'):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(3, 32, 3, 1, 1)
-        self.act1 = nn.ReLU()
-        self.maxpool1 = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1, 1)
-        self.act2 = nn.ReLU()
-        self.bn1 = nn.BatchNorm2d(64)
-        self.maxpool2 = nn.MaxPool2d(2, 2)
-
-        self.conv3 = nn.Conv2d(64, 128, 3, 1, 1)
-        self.act3 = nn.ReLU()
-        self.maxpool3 = nn.MaxPool2d(2, 2)
-        self.conv4 = nn.Conv2d(128, 128, 3, 1, 1)
-        self.act4 = nn.ReLU()
-        self.bn2 = nn.BatchNorm2d(128)
-        self.maxpool4 = nn.MaxPool2d(2, 2)
-
-        self.classifier = nn.Sequential(
-            nn.Linear(128, 64),
+        self.head = nn.Sequential(
+            DepthwiseSeparableConv(3, 32, 3, 1, 1),
             nn.ReLU(inplace=True),
-            nn.Linear(64, 64),
+            DepthwiseSeparableConv(32, 64, 3, 1, 1),
             nn.ReLU(inplace=True),
-            nn.Linear(64, 2)
+            DepthwiseSeparableConv(64, 64, 3, 1, 1),
+            nn.BatchNorm2d(64),
+            nn.MaxPool2d(2, 2)
         )
 
-        self.sm = nn.Softmax(dim=1)
+        self.block1 = Block(64, 128, 1, 2, activation_first=False, grow_first=True)
+        self.block2 = Block(128, 128, 2, 1, activation_first=True, grow_first=True)
+        self.block3 = Block(128, 256, 1, 2, activation_first=True, grow_first=True)
+        self.block4 = Block(256, 256, 2, 1, activation_first=True, grow_first=True)
+        self.block5 = Block(256, 512, 1, 2, activation_first=True, grow_first=True)
+        self.block6 = Block(512, 512, 2, 1, activation_first=True, grow_first=False)
+
+        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
+
+        self.classifier = nn.Sequential(
+            nn.Linear(512 * 7 * 7, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.7),
+            nn.Linear(4096, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(4096, num_classes)
+        )
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.act1(x)
-        x = self.maxpool1(x)
-        x = self.conv2(x)
-        x = self.act2(x)
-        x = self.bn1(x)
-        x = self.maxpool2(x)
-
-        x = self.conv3(x)
-        x = self.act3(x)
-        x = self.maxpool3(x)
-        x = self.conv4(x)
-        x = self.act4(x)
-        x = self.bn2(x)
-        x = self.maxpool4(x)
-
-        x = F.adaptive_avg_pool2d(x, (1, 1))
+        x = self.head(x)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.block4(x)
+        x = self.block5(x)
+        x = self.block6(x)
+        x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
-
-        return x
-
-    def inference(self, x):
-        x = self.forward(x)
-        x = self.sm(x)
         return x
 
 
