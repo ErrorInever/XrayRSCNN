@@ -14,7 +14,7 @@ from models.test import test
 
 def parse_args():
     parser = argparse.ArgumentParser(description='X-ray-RCNN')
-    parser.add_argument('--weight_path', dest='weight', help='Path to directory where weights of model stored',
+    parser.add_argument('--weight_path', dest='weight_path', help='Path to directory where weights of model stored',
                         default=None, type=str)
     parser.add_argument('--use_gpu', dest='use_gpu', help='use gpu', action='store_true')
     parser.add_argument('--test', dest='test', help='get confusion matrix, f-score', action='store_true')
@@ -53,8 +53,11 @@ if __name__ == '__main__':
 
     logger.setLevel(logging.INFO)
 
+    logger.info('Called with args: {}'.format(args.__dict__))
+    logger.info('Config params:{}'.format(cfg.__dict__))
+
     model = XrayRSCNN()
-    model = load_model(model, args.weight)
+    model = load_model(model, args.weight_path)
 
     if torch.cuda.is_available() and not args.use_gpu:
         logger.info('You have a GPU device so you should probably run with --use_gpu')
@@ -64,6 +67,7 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
 
+    model.to(device)
     logger.info('Running with device %s', device)
 
     if args.test:
