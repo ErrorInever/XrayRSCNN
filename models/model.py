@@ -106,7 +106,8 @@ class XrayRSCNN(nn.Module):
 
         self.block1 = Block(32, 64, 1, 2, activation_first=False, grow_first=True)
         self.block2 = Block(64, 128, 1, 2, activation_first=True, grow_first=True)
-        self.block3 = Block(128, 256, 1, 2, activation_first=True, grow_first=False)
+        self.block3 = Block(128, 256, 1, 2, activation_first=True, grow_first=True)
+        self.block4 = Block(256, 256, 2, 1, activation_first=True, grow_first=False)
 
         self.conv_1 = nn.Conv2d(256, 256, 3, 1, 1, bias=False)
         self.act_1 = activation_func(act_type)
@@ -132,6 +133,7 @@ class XrayRSCNN(nn.Module):
         x = self.block1(x)
         x = self.block2(x)
         x = self.block3(x)
+        x = self.block4(x)
 
         x = self.conv_1(x)
         x = self.act_1(x)
