@@ -32,7 +32,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
         loss.backward()
 
         optimizer.step()
-        scheduler.step()
+        #scheduler.step()
 
         # statistics
         running_loss += loss.item()
@@ -47,6 +47,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
             running_loss = 0.
             running_acc = 0.
 
+    scheduler.step(epoch_loss/len(dataloader))
     logger.info('----------TRAIN EPOCH [%s] | LOSS: %s | EPOCH ACC: %s ---------', epoch + 1,
                 epoch_loss / len(dataloader), epoch_acc / len(dataloader))
 
