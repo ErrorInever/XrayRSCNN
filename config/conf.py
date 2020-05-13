@@ -19,4 +19,8 @@ __C.WEIGHT_DECAY = 0.001
 __C.STEP_SIZE = 8
 __C.GAMMA = 0.1
 
+# ReduceLROnPlateau
+__C.PATIENCE = 3
+__C.VERBOSE = True
+
 __C.SAVE_EPOCH_NUM = 75
