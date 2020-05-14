@@ -1,4 +1,5 @@
 import logging
+import torch
 from models.functions import make_checkpoint
 from config.conf import cfg
 
@@ -25,14 +26,17 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
         images = image.to(device)
         labels = label.to(device)
 
-        optimizer.zero_grad()
+        with torch.autograd.set_detect_anomaly(True):
+            optimizer.zero_grad()
 
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            # anti-gradient exploding
+            torch.nn.utils.clip_grad_norm(model.parameters(), 0.5)
 
-        optimizer.step()
-        #scheduler.step()
+            optimizer.step()
+            #scheduler.step()
 
         # statistics
         running_loss += loss.item()

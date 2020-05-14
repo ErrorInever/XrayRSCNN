@@ -100,7 +100,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.SGD(model.parameters(), lr=cfg.LEARNING_RATE, momentum=cfg.MOMENTUM,
                                 weight_decay=cfg.WEIGHT_DECAY)
 
-    #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=cfg.STEP_SIZE, gamma=cfg.GAMMA)
+    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=cfg.STEP_SIZE, gamma=cfg.GAMMA)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=cfg.PATIENCE, verbose=cfg.VERBOSE)
 
     metric_logger = SummaryWriter()
