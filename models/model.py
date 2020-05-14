@@ -1,5 +1,4 @@
 import torchvision
-import torch.nn.functional as F
 from torch import nn
 from models.functions import activation_func
 
@@ -114,10 +113,10 @@ class XrayRSCNN(nn.Module):
         self.conv_2 = nn.Conv2d(256, 256, 3, 1, 1, bias=False)
         self.act_2 = activation_func(act_type)
         self.bn_1 = nn.BatchNorm2d(256)
-        self.maxpool_1 = nn.MaxPool2d(2, 2)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         self.classifier = nn.Sequential(
-            nn.Linear(256 * 7 * 7, 2048, bias=True),
+            nn.Linear(256, 2048, bias=True),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.7),
             nn.Linear(2048, 2048, bias=True),
@@ -140,7 +139,7 @@ class XrayRSCNN(nn.Module):
         x = self.conv_2(x)
         x = self.act_2(x)
         x = self.bn_1(x)
-        x = self.maxpool_1(x)
+        x = self.avgpool(x)
 
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
