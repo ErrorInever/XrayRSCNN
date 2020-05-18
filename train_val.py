@@ -10,7 +10,7 @@ from torchvision import transforms
 from config.conf import cfg
 from data.dataset import XrayImageFolder
 from torch.utils.data import DataLoader
-from models.model import XrayRSCNN, XrayDRSCNN, XrayMRSCNN
+from models.model import XrayMRSCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
 from models.test import test
