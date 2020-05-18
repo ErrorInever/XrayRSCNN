@@ -21,7 +21,7 @@ Neural network for detecting pneumonia
 ### example run
  > python inference.py --weight_path "models/weights/xray.pth" --inference --img "folder/pneumo.png" --use_gpu
 
-![alt text](https://raw.githubusercontent.com/ErrorInever/XrayRSCNN/images/normal_true.png)
+![alt text](https://raw.githubusercontent.com/ErrorInever/XrayRSCNN/master/images/normal_true.png)
 
 ### Metrics pre-trained model
         Accuracy: 88.18%
@@ -29,7 +29,7 @@ Neural network for detecting pneumonia
         Precision: 79.35%
         F1-SCORE 88.22%
 
-![alt text](https://raw.githubusercontent.com/ErrorInever/Vision_RCNN/master/images/confusion_matrix.png)
+![alt text](https://raw.githubusercontent.com/ErrorInever/XrayRSCNN/master/images/confusion_matrix.png)
 
 
 ### Start train
