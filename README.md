@@ -1,5 +1,7 @@
 Neural network for detecting pneumonia
 
+### Dataset (https://data.mendeley.com/datasets/rscbjbr9sj/2)
+
 ### Works on python 3.7 and lower
 
 ### Install
@@ -42,10 +44,10 @@ Neural network for detecting pneumonia
       --out_dir OUT_DIR    Path to out directory
       --save_model         save model
 
-# example run
+### example run
  > python train_val.py --root_dir "path/to/data/dir" --outdir "path/to/output/dir" --use_gpu --save_model
 
-# you can edit **config/conf.py** for change params
+### you can edit **config/conf.py** for change params
         __C.NUM_EPOCHS = 15
         __C.BATCH_SIZE = 5
         __C.LEARNING_RATE = 1e-2
