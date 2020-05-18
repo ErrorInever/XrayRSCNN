@@ -8,6 +8,21 @@ logger = logging.getLogger(__name__)
 
 def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, epoch,
                     metric_logger, graph_loss, graph_acc, save_dir, print_freq=100):
+    """
+    Train model
+    :param model: instance of model
+    :param dataloader: instance of dataloader
+    :param optimizer: instance of optimizer
+    :param criterion: instance of loss function
+    :param scheduler: instance of scheduler
+    :param device: current device
+    :param epoch: ``int`` number of epoch
+    :param metric_logger: ``SummaryWriter`` logger
+    :param graph_loss: ``Session`` losswise
+    :param graph_acc: ``Session`` losswise
+    :param save_dir: ``Str`` output directory
+    :param print_freq: ``int`` output frequency
+    """
     logger.setLevel(logging.INFO)
 
     epoch_loss = 0.
@@ -36,7 +51,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, scheduler, device, 
             torch.nn.utils.clip_grad_norm(model.parameters(), 0.5)
 
             optimizer.step()
-            #scheduler.step()
+            # scheduler.step()
 
         # statistics
         running_loss += loss.item()

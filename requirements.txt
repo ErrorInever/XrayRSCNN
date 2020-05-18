@@ -1,3 +1,6 @@
+seaborn
+imgaug
+easydict
 scikit-learn
 losswise
 tensorboardX
@@ -8,5 +11,3 @@ numpy
 kornia
 torch
 torchvision
-
-

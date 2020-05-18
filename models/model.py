@@ -3,7 +3,7 @@ from models.functions import activation_func
 
 
 class DepthwiseSeparableConv(nn.Module):
-
+    """Depthwise Separable Convolution"""
     def __init__(self, in_channels, out_channel, kernel_size=1, stride=1, padding=0, dilation=1, bias=False):
         super().__init__()
         # convolve separately each channel of specified kernel
@@ -20,7 +20,7 @@ class DepthwiseSeparableConv(nn.Module):
 
 
 class Block(nn.Module):
-
+    """Block layer"""
     def __init__(self, in_channels, out_channels, repeats, strides=1, act_type='relu', activation_first=True,
                  grow_first=True):
         super().__init__()
@@ -88,7 +88,7 @@ class Block(nn.Module):
 
 
 class XrayMRSCNN(nn.Module):
-
+    """Main model"""
     def __init__(self, num_classes=2, act_type='relu'):
         super().__init__()
         self.num_classes = num_classes

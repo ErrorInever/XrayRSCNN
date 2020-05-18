@@ -4,6 +4,18 @@ logger = logging.getLogger(__name__)
 
 
 def evaluate(model, dataloader, criterion, device, epoch, metric_logger, graph_loss, graph_acc, print_freq=100):
+    """
+    Evaluate one epoch
+    :param model: instance of model
+    :param dataloader:  dataloader
+    :param criterion: loss function
+    :param device: current device
+    :param epoch: ``int`` number of epoch
+    :param metric_logger: ``SummaryWriter``
+    :param graph_loss: ``Session`` graph for loss metrics
+    :param graph_acc: ``Session`` graph for accuracy metrics
+    :param print_freq: ``int`` output frequency
+    """
     logger.setLevel(logging.INFO)
 
     model.eval()
