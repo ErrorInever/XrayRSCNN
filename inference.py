@@ -29,7 +29,7 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    assert args.weight, 'weight path not specified'
+    assert args.weight_path, 'weight path not specified'
     if args.inference:
         assert args.img_path, 'image path not specified'
     if args.test:
@@ -82,10 +82,14 @@ if __name__ == '__main__':
 
     elif args.inference:
         img = cv2.imread(args.img_path)
-        img = transform(img).unsquuze(0)
+        try:
+            img = transform(img).unsqueeze(0)
+        except TypeError:
+            logger.exception('Possible incorrect image path or image type')
 
         start_time = datetime.now()
         with torch.no_grad():
+            img = img.to(device)
             output = model.inference(img)
 
         label = output.data.argmax()
@@ -94,4 +98,4 @@ if __name__ == '__main__':
 
         show_result(img, pred_class, prob)
         logger.info('Detection finished in %s seconds', (datetime.now() - start_time).total_seconds())
-        logger.info('Predicted class: %s\nProbability%s%', pred_class, round(prob, 1))
+        logger.info('Predicted class: %s \nProbability %s', pred_class, round(prob, 1))
