@@ -21,6 +21,7 @@ def show_batch(batch):
 
 
 def show_result(img, pred_class, prob):
+    img = img.detach().cpu().squeeze(0).permute(1, 2, 0)
     plt.axis('off')
     plt.imshow(img)
     plt.title('Predicted class: {}\nProbability: {}%'.format(pred_class, round(prob, 1)))
