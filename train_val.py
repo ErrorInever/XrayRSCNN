@@ -10,7 +10,7 @@ from torchvision import transforms
 from config.conf import cfg
 from data.dataset import XrayImageFolder
 from torch.utils.data import DataLoader
-from models.model import XrayRSCNN, DeepXrayRCNN
+from models.model import XrayRSCNN, XrayDRSCNN, XrayMRSCNN
 from models.train import train_one_epoch
 from models.eval import evaluate
 from models.test import test
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     logger.info('Datasets created: Train batches %s Test batches %s Val batches %s', len(train_dataloader),
                 len(test_dataloader), len(val_dataloader))
 
-    model = XrayRSCNN()
+    model = XrayMRSCNN()
     model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
