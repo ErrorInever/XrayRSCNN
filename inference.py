@@ -2,12 +2,12 @@ import logging
 import argparse
 import torch
 import torchvision
-from tqdm import tqdm
+import cv2
 from datetime import datetime
-from models.model import XrayRSCNN
+from models.model import XrayMRSCNN
 from models.functions import load_model
 from config.conf import cfg
-from data.dataset import Images, XrayImageFolder
+from data.dataset import XrayImageFolder
 from torch.utils.data import DataLoader
 from models.test import test
 
@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument('--test', dest='test', help='get confusion matrix, f-score', action='store_true')
     parser.add_argument('--test_data', dest='test_data', help='Path to test images folder', default=None, type=str)
     parser.add_argument('--inference', dest='inference', help='inference mode', action='store_true')
-    parser.add_argument('--data_path', dest='data_path', help='Path to directory where images stored', default=None,
+    parser.add_argument('--img', dest='img_path', help='Path to image', default=None,
                         type=str)
 
     return parser.parse_args()
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     args = parse_args()
     assert args.weight, 'weight path not specified'
     if args.inference:
-        assert args.data_path, 'data path not specified'
+        assert args.img_path, 'image path not specified'
     if args.test:
         assert args.test_data, 'test data path not specified'
     if args.inference is None and args.test is None:
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     logger.info('Called with args: {}'.format(args.__dict__))
     logger.info('Config params:{}'.format(cfg.__dict__))
 
-    model = XrayRSCNN()
+    model = XrayMRSCNN()
     model = load_model(model, args.weight_path)
 
     if torch.cuda.is_available() and not args.use_gpu:
@@ -70,26 +70,26 @@ if __name__ == '__main__':
     model.to(device)
     logger.info('Running with device %s', device)
 
+    transform = torchvision.transforms.Compose(
+        [torchvision.transforms.ToTensor()]
+    )
+
     if args.test:
-        transform = torchvision.transforms.Compose(
-            [torchvision.transforms.ToTensor()]
-        )
         test_dataset = XrayImageFolder(args.test_data, transform=transform)
         test_dataloader = DataLoader(test_dataset, batch_size=cfg.BATCH_SIZE)
         test(model, test_dataloader, device)
 
-    # img_dataset = Images(args.data_path)
-    # img_dataloader = DataLoader(img_dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=4)
-    #
-    # logger.info('Images loaded: %s', len(img_dataset))
-    # start_time = datetime.now()
-    #
-    # for img in tqdm(img_dataloader, total=len(img_dataloader)):
-    #     images = img.to(device)
-    #
-    #     with torch.no_grad():
-    #         outputs = model(images)
-    #         # TODO
-    # end_time = datetime.now()
-    # logger.info('Detection %s images finished in %s seconds', len(img_dataset),
-    #             (end_time - start_time).total_seconds())
+    elif args.inference:
+        img = cv2.imread(args.img_path)
+        img = transform(img).unsquuze(0)
+
+        start_time = datetime.now()
+        with torch.no_grad():
+            output = model.inference(img)
+
+        label = output.data.argmax()
+        prob = output.detach()[0][label].item() * 100
+        pred_class = 'NORMAL' if label.item() == 0 else 'PNEUMONIA'
+
+        logger.info('Detection finished in %s seconds', (datetime.now() - start_time).total_seconds())
+        logger.info('Predicted class: %s\nProbability%s%', pred_class, round(prob, 1))
