@@ -10,6 +10,7 @@ from config.conf import cfg
 from data.dataset import XrayImageFolder
 from torch.utils.data import DataLoader
 from models.test import test
+from visualize import show_result
 
 
 def parse_args():
@@ -91,5 +92,6 @@ if __name__ == '__main__':
         prob = output.detach()[0][label].item() * 100
         pred_class = 'NORMAL' if label.item() == 0 else 'PNEUMONIA'
 
+        show_result(img, pred_class, prob)
         logger.info('Detection finished in %s seconds', (datetime.now() - start_time).total_seconds())
         logger.info('Predicted class: %s\nProbability%s%', pred_class, round(prob, 1))

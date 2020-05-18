@@ -18,3 +18,11 @@ def show_batch(batch):
         ax[i].axis('off')
         ax[i].set_title(label, fontsize=15, weight='bold')
     plt.show()
+
+
+def show_result(img, pred_class, prob):
+    plt.axis('off')
+    plt.imshow(img)
+    plt.title('Predicted class: {}\nProbability: {}%'.format(pred_class, round(prob, 1)))
+    plt.savefig('result.png', bbox_inches='tight')
+    plt.show()
