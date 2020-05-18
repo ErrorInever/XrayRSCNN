@@ -1,4 +1,3 @@
-import torchvision
 from torch import nn
 from models.functions import activation_func
 
@@ -77,76 +76,19 @@ class Block(nn.Module):
         return out
 
 
-class Head(nn.Module):
-    """Pre-trained layers on ImageNet from vgg19"""
-    def __init__(self, pretrained=True):
-        super().__init__()
-        features = list(torchvision.models.vgg19(pretrained=pretrained, progress=True).features)[:3]
-        self.features = nn.Sequential(*features)
-
-    def forward(self, x):
-        return self.features(x)
-
-
-class XrayRSCNN(nn.Module):
-    # 30kk params
-    def __init__(self, num_classes=2, act_type='relu'):
-        super().__init__()
-        self.num_classes = num_classes
-
-        self.head = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        )
-
-        self.block1 = Block(64, 64, 1, 1, activation_first=False, grow_first=True)
-        self.block2 = Block(64, 128, 1, 2, activation_first=True, grow_first=True)
-        self.block3 = Block(128, 256, 1, 2, activation_first=True, grow_first=True)
-        self.block4 = Block(256, 256, 2, 1, activation_first=True, grow_first=False)
-
-        self.conv_1 = nn.Conv2d(256, 256, 3, 1, 1, bias=False)
-        self.act_1 = activation_func(act_type)
-        self.conv_2 = nn.Conv2d(256, 256, 3, 1, 1, bias=False)
-        self.act_2 = activation_func(act_type)
-        self.bn_1 = nn.BatchNorm2d(256)
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-
-        self.classifier = nn.Sequential(
-            nn.Dropout(p=0.15, inplace=False),
-            nn.Linear(256, num_classes, bias=True)
-        )
-
-        self.sm = nn.Softmax(dim=1)
-
-    def forward(self, x):
-        x = self.head(x)
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x)
-        x = self.block4(x)
-
-        x = self.conv_1(x)
-        x = self.act_1(x)
-        x = self.conv_2(x)
-        x = self.act_2(x)
-        x = self.bn_1(x)
-        x = self.avgpool(x)
-
-        x = x.view(x.size(0), -1)
-        x = self.classifier(x)
-
-        return x
-
-    def inference(self, x):
-        x = self.forward(x)
-        x = self.sm(x)
-        return x
+# class Head(nn.Module):
+#     """Pre-trained layers on ImageNet from vgg19"""
+#     def __init__(self, pretrained=True):
+#         super().__init__()
+#         features = list(torchvision.models.vgg19(pretrained=pretrained, progress=True).features)[:3]
+#         self.features = nn.Sequential(*features)
+#
+#     def forward(self, x):
+#         return self.features(x)
 
 
 class XrayMRSCNN(nn.Module):
-    # 500k params
+
     def __init__(self, num_classes=2, act_type='relu'):
         super().__init__()
         self.num_classes = num_classes
@@ -184,67 +126,3 @@ class XrayMRSCNN(nn.Module):
         x = self.forward(x)
         x = self.sm(x)
         return x
-
-
-class XrayDRSCNN(nn.Module):
-
-    def __init__(self, num_classes=2, act_type='relu'):
-        super().__init__()
-
-        self.head = nn.Sequential(
-            DepthwiseSeparableConv(3, 32, 3, 1, 1),
-            nn.ReLU(inplace=True),
-            DepthwiseSeparableConv(32, 64, 3, 1, 1),
-            nn.ReLU(inplace=True),
-            DepthwiseSeparableConv(64, 64, 3, 1, 1),
-            nn.BatchNorm2d(64),
-            nn.MaxPool2d(2, 2)
-        )
-
-        self.block1 = Block(64, 128, 1, 2, activation_first=False, grow_first=True)
-        self.block2 = Block(128, 128, 2, 1, activation_first=True, grow_first=True)
-        self.block3 = Block(128, 256, 1, 2, activation_first=True, grow_first=True)
-        self.block4 = Block(256, 256, 2, 1, activation_first=True, grow_first=True)
-        self.block5 = Block(256, 512, 1, 2, activation_first=True, grow_first=True)
-        self.block6 = Block(512, 512, 2, 1, activation_first=True, grow_first=False)
-
-        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
-
-        self.classifier = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.7),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.5),
-            nn.Linear(4096, num_classes)
-        )
-
-    def forward(self, x):
-        x = self.head(x)
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x)
-        x = self.block4(x)
-        x = self.block5(x)
-        x = self.block6(x)
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.classifier(x)
-        return x
-
-
-def get_resnet_50_test(num_class=2, pretrained=True):
-    model_ft = torchvision.models.resnet50(pretrained=pretrained)
-
-    for param in model_ft.parameters():
-        param.requires_grad = False
-
-    num_features = model_ft.fc.in_features
-
-    model_ft.fc = nn.Sequential(
-        nn.Dropout(0.15),
-        nn.Linear(num_features, num_class)
-    )
-
-    return model_ft
