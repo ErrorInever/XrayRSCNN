@@ -7,22 +7,21 @@ Neural network for detecting pneumonia
 2. > install requirements: ``pip install -r requirements.txt``
 
 ### Start inference
-> run inference.py with args:
-                                 optional arguments:
-                                 -h, --help            show this help message and exit
-                                 --weight_path WEIGHT_PATH
-                                                       Path to directory where weights of model stored
-                                 --use_gpu             use gpu
-                                 --test                get confusion matrix, f-score
-                                 --test_data TEST_DATA
-                                                       Path to test images folder
-                                 --inference           inference mode
-                                 --img IMG_PATH        Path to image
 
-# example run
+    optional arguments:
+      -h, --help                    show this help message and exit
+      --weight_path WEIGHT_PATH     Path to directory where weights of model stored
+      --use_gpu                     use gpu
+      --test                        get confusion matrix, f-score
+      --test_data TEST_DATA         Path to test images folder
+      --inference                   inference mode
+      --img IMG_PATH                Path to image
+                                 
+
+### example run
  > python inference.py --weight_path "models/weights/xray.pth" --inference --img "folder/pneumo.png" --use_gpu
 
-![alt text](https://raw.githubusercontent.com/ErrorInever/Vision_RCNN/master/images/normal_true.png)
+![alt text](https://raw.githubusercontent.com/ErrorInever/XrayRSCNN/images/normal_true.png)
 
 ### Metrics pre-trained model
         Accuracy: 88.18%
@@ -34,14 +33,14 @@ Neural network for detecting pneumonia
 
 
 ### Start train
-> run train_val.py  with args:
-                                  optional arguments:
-                                    -h, --help           show this help message and exit
-                                    --root_dir ROOT_DIR  Path to root directory of dataset
-                                    --use_gpu            use gpu
-                                    --api_key API_KEY    losswise api key
-                                    --out_dir OUT_DIR    Path to out directory
-                                    --save_model         save model
+
+    optional arguments:
+      -h, --help           show this help message and exit
+      --root_dir ROOT_DIR  Path to root directory of dataset
+      --use_gpu            use gpu
+      --api_key API_KEY    losswise api key
+      --out_dir OUT_DIR    Path to out directory
+      --save_model         save model
 
 # example run
  > python train_val.py --root_dir "path/to/data/dir" --outdir "path/to/output/dir" --use_gpu --save_model
